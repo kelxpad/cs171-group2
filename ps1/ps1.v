@@ -26,34 +26,56 @@ try using the tactic 'unfold'.
 *)
 
 Inductive signal : Type :=
-  | ON
-  | OFF.
-
+    | ON
+    | OFF.
 (*
 1.a (2pts). Define the following logic gates:
 *)
 
 Definition not_gate (s : signal) : signal :=
-(*write your answer here*)
+    match s with
+    | ON => OFF
+    | OFF => ON
+    end.
 
 Definition or_gate (s1 s2 : signal) : signal :=
-(*write your answer here*)
+    match s1, s2 with
+    | ON, _ => ON
+    | _, ON => ON
+    | OFF, OFF => OFF
+    end.
 
 Definition and_gate (s1 s2 : signal) : signal :=
-(*write your answer here*)
+    match s1, s2 with
+    | ON, ON => ON
+    | _, _ => OFF
+    end.
 
 Definition xor_gate (s1 s2 : signal) : signal :=
-(*write your answer here*)
+    match s1, s2 with
+    | ON, OFF => ON
+    | OFF, ON => ON
+    | _, _ => OFF
+    end.
 
 Definition xnor_gate (s1 s2 : signal) : signal :=
-(*write your answer here*)
+    match s1, s2 with
+    | ON, ON => ON
+    | OFF, OFF => ON
+    | _, _ => OFF
+    end.
 
 Definition nor_gate (s1 s2 : signal) : signal :=
-(*write your answer here*)
+    match s1, s2 with
+    | OFF, OFF => ON
+    | _, _ => OFF
+    end.
 
 Definition nand_gate (s1 s2 : signal) : signal :=
-(*write your answer here*)
-
+    match s1, s2 with
+    | ON, ON => OFF
+    | _, _ => ON
+    end.
 
 (*
 1.b (1pt). Take a look at this circuit image:
@@ -61,10 +83,8 @@ https://drive.google.com/file/d/1u_Vk0XN7dsdWT9Ecr9y0h6x4zHOohROZ/view?usp=shari
 Implement the circuit as a function mygate. You may use the gates 
 you defined in 1.a.
 *)
-
 Definition mygate (s1 s2 s3 s4 : signal) : signal :=
-(*write your answer here*)
-
+    or_gate s1 (and_gate (xnor_gate s2 s3) (not_gate s4)).
 
 (*
 1.c (1pt). Prove the following Theorem c1 which states that if the incoming
@@ -73,30 +93,85 @@ signal has s1 = ON, then your mygate circuit from 1.b automatically outputs ON.
 
 Theorem c1 : forall s1 s2 s3 s4 : signal,
   s1 = ON -> mygate s1 s2 s3 s4 = ON.
-(*write your answer here*)
-
+Proof.
+    intros. rewrite H. simpl. reflexivity.
+Qed.
 
 (*
 1.d (1pt). Take a look at this circuit image.
 https://drive.google.com/file/d/1cVFAFCeAz2S-2Cq9okMgSw-CjC5KXD6w/view?usp=sharing
 Implement the circuit as a function mygate2.
 *)
-
 Definition mygate2 (s1 s2 : signal) : signal :=
-(*write your answer here*)
-
-
-(*
-1.e (1pt). Using the proposition equalgates defined below, 
-prove that mygate2 is an equivalent circuit to xnor_gate by showing that 
-both circuits output the same signal for any input. This is Theorem c2.
-*)
+    nand_gate (nand_gate s1 s2) (nand_gate (nand_gate s1 s1) (nand_gate s2 s2)).
 
 Definition equalgates (g1 g2 : signal -> signal -> signal) : Prop := 
 forall (s1 s2 : signal), g1 s1 s2 = g2 s1 s2.
 
-Theorem c2 : equalgates mygate2 xnor_gate. 
-(*write your answer here*)
+Theorem c2 : equalgates mygate2 xnor_gate.
+Proof.
+    intros. unfold equalgates. intros.
+    destruct s1, s2.
+    - reflexivity.
+    - reflexivity.
+    - reflexivity.
+    - reflexivity.
+Qed.
+(*
+2.a (1pt). Take a look at this image.
+https://drive.google.com/file/d/1n9TZn3jVXd1-33Y9uODFNWwobwc77nXc/view?usp=sharing
+Each cell of the table contains a tuple where the first coordinate
+refers to the utility gained by player 1 if player 1 acts according to the
+row's action. The second coordinate refers to the utility gained by player 2
+if player 2 acts according to the column's action.
+
+For instance, under row P1 BETRAY and column P2 BETRAY, we have the tuple
+(5,5), which indicates that if P1 betrays and P2 betrays, then both gain utility
+5. On the other hand, under row P1 BETRAY and column P2 SILENT, we have the
+tuple (3,0) which indicates that if P1 betrays and P2 stays silent, then P2
+gains nothing but P1 gains a utility of 3.
+
+Implement the utility function as utility1 below, where utility1 takes in
+2 inputs. The first input is a player datatype, and the second is a 
+strategy datatype, where both player and strategy are defined for you above.
+Given a player p and a strategy s, utility1 should output a nat corresponding to
+the table shown in the image link.
+*)
+
+Definition utility1 (p : player) (s : strategy) : nat :=
+    
+(* ################################################################# *)
+
+(*
+3. (2pts TOTAL). NATURAL NUMBERS. We'll prove here some results 
+regarding our favorite natural numbers.
+*)
+
+(*
+3.a (1pt). Prove this simple Theorem.
+*)
+Theorem num0 : forall (n : nat), (even n = even (S n)) -> False.
+Proof.
+    intros. induction n.
+    - discriminate H.
+    - apply IHn. symmetry. apply H.
+Qed.
+
+(*
+3.b (1pt). Assuming Axiom axone, prove Theorem num1 below which states
+that any natural number is either even or not even (i.e. odd).
+*)
+
+Axiom axone : forall (n : nat), ((even n = true) -> False) -> (even (S n) = true).
+
+Theorem num1 : forall (n : nat), (even n = true) \/ ((even n = true) -> False).
+Proof.
+    intros. induction n.
+    - left. reflexivity.
+    - destruct IHn.
+        + right. intros. apply num0 with (n := n). rewrite H. rewrite H0. reflexivity.
+        + left. apply axone. apply H.
+Qed.
 
 
 (* ################################################################# *)
@@ -249,10 +324,12 @@ regarding our favorite natural numbers.
 (*
 3.a (1pt). Prove this simple Theorem.
 *)
-
 Theorem num0 : forall (n : nat), (even n = even (S n)) -> False.
-(*write your answer here*)
-
+Proof.
+    intros. induction n.
+    - discriminate H.
+    - apply IHn. symmetry. apply H.
+Qed.
 
 (*
 3.b (1pt). Assuming Axiom axone, prove Theorem num1 below which states
@@ -262,8 +339,13 @@ that any natural number is either even or not even (i.e. odd).
 Axiom axone : forall (n : nat), ((even n = true) -> False) -> (even (S n) = true).
 
 Theorem num1 : forall (n : nat), (even n = true) \/ ((even n = true) -> False).
-(*write your answer here*)
-
+Proof.
+    intros. induction n.
+    - left. reflexivity.
+    - destruct IHn.
+        + right. intros. apply num0 with (n := n). rewrite H. rewrite H0. reflexivity.
+        + left. apply axone. apply H.
+Qed.
 
 (* ################################################################# *)
 
@@ -344,16 +426,24 @@ read privilege to all other disks.
 *)
 
 Inductive user : Type :=
-(*write your answer here*)
+    | student
+    | teacher
+    | admin.
 
 Inductive file : Type :=
-(*write your answer here*)
+    | lesson
+    | quiz
+    | grade
+    | userdata.
 
 Inductive disk : Type :=
-(*write your answer here*)
+    | disk_a
+    | disk_b
+    | disk_c.
 
 Inductive privilege : Type :=
-(*write your answer here*)
+    | read
+    | write.
 
 (*
 5.b (1pt). Define the function check_disk such that given an input file,
@@ -361,8 +451,12 @@ outputs the disk in which the file is stored (following specs above).
 *)
 
 Definition check_disk (f : file) : disk :=
-(*write your answer here*)
-
+    match f with
+    | lesson => disk_a
+    | quiz => disk_a
+    | grade => disk_b
+    | userdata => disk_c
+    end.
 
 (*
 5.c (1pt). Define the function check_access such that given inputs
@@ -372,8 +466,15 @@ while the input student lesson read should return true.
 *)
 
 Definition check_access (u : user) (f : file) (p : privilege) : bool :=
-(*write your answer here*)
-
+    match u, check_disk f , p with
+    | student, disk_a, read => true
+    | teacher, disk_a, _ => true
+    | teacher, disk_b, _ => true
+    | teacher, disk_c, read => true
+    | admin, disk_c, _ => true
+    | admin, _, read => true
+    | _, _, _ => false
+    end.
 
 (*
 5.c (1pt). Define the proposition access, which is True if the
@@ -381,8 +482,7 @@ user has the right privilege for a file, and False o.w.
 *)
 
 Definition access (u : user) (f : file) (p : privilege) : Prop :=
-(*write your answer here*)
-
+    check_access u f p = true.
 
 (*
 5.d (1pt). Prove Theorem caet1 which states that if a user is a teacher,
@@ -390,8 +490,9 @@ then the teacher does not have write privilege to userdata files.
 *)
 
 Theorem caet1 : forall u, u = teacher -> ((access u userdata write) -> False).
-(*write your answer here*)
-
+Proof.
+    intros. rewrite H in H0. unfold access in H0. simpl in H0. discriminate.
+Qed.
 
 (*
 5.d (1pt). Prove Theorem caet2 which states that if a user is an admin, then
@@ -399,18 +500,9 @@ he is given read / write privileges on userdata files.
 *)
 
 Theorem caet2 : forall (u : user) (p : privilege), u = admin -> access u userdata p.
-(*write your answer here*)
-
-
-(*
-5.e (1pt). Prove Theorem caet3 which states that if a file is either a quiz
-or a lesson, and if the user has write privileges on both files, then
-the user is necessarily a teacher.
-*)
-
-Theorem caet3 : forall u f, ((f = quiz) \/ (f = lesson)) -> 
-(access u lesson write /\ access u quiz write) -> u = teacher.
-(*write your answer here*)
+Proof.
+    intros. rewrite H. unfold access. reflexivity.
+Qed.
 
 
 (*
@@ -420,8 +512,15 @@ to lesson / quiz, but no write access.
 
 Theorem caet4 : forall u, u = student -> access u lesson read /\ 
 access u quiz read /\ (access u lesson write -> False) /\ (access u quiz write -> False).
-(*write your answer here*)
-
+Proof.
+    intros. rewrite H. unfold access. split.
+    - reflexivity.
+    - split.
+        + reflexivity.
+        + split.
+            -- intros. simpl in H0. discriminate.
+            -- intros. simpl in H0. discriminate.
+Qed.
 
 (*
 5.g (1pt). Prove Theorem caet5 which states that an admin user has
@@ -429,8 +528,13 @@ read access to all files.
 *)
 
 Theorem caet5 : forall u f, u = admin -> access u f read.
-(*write your answer here*)
-
+Proof.
+    intros. unfold access. rewrite H. destruct f.
+    - reflexivity.
+    - reflexivity.
+    - reflexivity.
+    - reflexivity.
+Qed.
 
 (*
 6. (7pts TOTAL). PERCEPTRON. For data science fans, here we'll verify the simplest
