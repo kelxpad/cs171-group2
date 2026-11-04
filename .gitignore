@@ -1,0 +1,6 @@
+# Rocq / Coq compiled files and build metadata
+*.vo
+*.vos
+*.vok
+*.glob
+.*.aux

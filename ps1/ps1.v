@@ -1,5 +1,4 @@
 (*
-(*
 INSTRUCTIONS
 
 Place this file (ps_blanks.v) inside a folder containing the
@@ -117,6 +116,7 @@ Proof.
     - reflexivity.
     - reflexivity.
 Qed.
+(* Disabled: incomplete duplicate material and item 2.
 (*
 2.a (1pt). Take a look at this image.
 https://drive.google.com/file/d/1n9TZn3jVXd1-33Y9uODFNWwobwc77nXc/view?usp=sharing
@@ -312,7 +312,7 @@ is a sufficient condition for being an equilibrium.
 Theorem gt4 : forall (s : strategy) (u : player -> strategy -> nat), 
 dominant_strategy s u -> equilibrium s u.
 (*write your answer here*)
-    
+*)
 
 (* ################################################################# *)
 
@@ -349,6 +349,7 @@ Qed.
 
 (* ################################################################# *)
 
+(* Disabled: items 4 through 7.
 (*
 4. (5pts TOTAL). LOGIC: Let's do some logic !
 *)
