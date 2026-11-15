@@ -116,7 +116,7 @@ Proof.
     - reflexivity.
     - reflexivity.
 Qed.
-(* Disabled: incomplete duplicate material and item 2.
+(* Disabled: incomplete duplicate material.
 (*
 2.a (1pt). Take a look at this image.
 https://drive.google.com/file/d/1n9TZn3jVXd1-33Y9uODFNWwobwc77nXc/view?usp=sharing
@@ -176,6 +176,7 @@ Qed.
 
 (* ################################################################# *)
 
+*)
 (*
 HINT 1: If a goal has a function name that cannot be simplified, 
 try using the tactic 'unfold'.
@@ -225,7 +226,14 @@ the table shown in the image link.
 *)
 
 Definition utility1 (p : player) (s : strategy) : nat :=
-(*write your answer here*)
+    match p, s with
+    | _, actionpair betray betray => 5
+    | p1, actionpair betray silent => 3
+    | p2, actionpair betray silent => 0
+    | p1, actionpair silent betray => 0
+    | p2, actionpair silent betray => 3
+    | _, actionpair silent silent => 2
+    end.
 
 
 (*
@@ -238,7 +246,11 @@ Definition dominant_strategy (s : strategy) (u : player -> strategy -> nat): Pro
 forall (p : player) (s' : strategy), (u p s' <=? u p s) = true.
 
 Theorem gt1 : dominant_strategy (actionpair betray betray) utility1.
-(*write your answer here*)
+Proof.
+    unfold dominant_strategy.
+    intros p [a1 a2].
+    destruct p, a1, a2; reflexivity.
+Qed.
 
 
 (*
@@ -249,7 +261,14 @@ utility2 below.
 *)
 
 Definition utility2 (p : player) (s : strategy) : nat :=
-(*write your answer here*)
+    match p, s with
+    | _, actionpair betray betray => 1
+    | p1, actionpair betray silent => 3
+    | p2, actionpair betray silent => 0
+    | p1, actionpair silent betray => 0
+    | p2, actionpair silent betray => 3
+    | _, actionpair silent silent => 2
+    end.
 
 
 (*
@@ -257,8 +276,11 @@ Definition utility2 (p : player) (s : strategy) : nat :=
 get_action which fetches the action of player p under strategy s.
 *)
 
-Definition get_action (p : player) (s : strategy) :=
-(*write your answer here*)
+Definition get_action (p : player) (s : strategy) : action :=
+    match p, s with
+    | p1, actionpair a1 _ => a1
+    | p2, actionpair _ a2 => a2
+    end.
 
 
 (*
@@ -279,7 +301,12 @@ forall (s' : strategy),
 (get_action p1 s = get_action p1 s' -> (u p2 s' <=? u p2 s) = true).
 
 Theorem gt2 : equilibrium (actionpair betray betray) utility2.
-(*write your answer here*)
+Proof.
+    unfold equilibrium.
+    intros [a1 a2].
+    destruct a1, a2; split; simpl; intros H;
+        try discriminate H; reflexivity.
+Qed.
 
 
 (*
@@ -288,11 +315,14 @@ as the proposition not_equilibrium below.
 *)
 
 Definition not_equilibrium (s : strategy) (u : player -> strategy -> nat) : Prop :=
-(*write your answer here*) 
+(* A profitable deviation must keep the other player's action fixed.
+   Conjunctions are needed here instead of the template's implications. 
+   TODO: Consult with Sir if this is the right approach as the template was changed to solve it.
+   *)
 exists (s' : strategy), 
-(get_action p2 s = get_action p2 s' -> (u p1 s' <=? u p1 s) = false) 
+(get_action p2 s = get_action p2 s' /\ (u p1 s' <=? u p1 s) = false)
 \/
-(get_action p1 s = get_action p1 s' -> (u p2 s' <=? u p2 s) = false).
+(get_action p1 s = get_action p1 s' /\ (u p2 s' <=? u p2 s) = false).
 
 (*
 2.g (1pt). Prove Theorem gt3 which states that the strategy SILENT SILENT
@@ -300,7 +330,11 @@ is not an equilibrium given utility2.
 *)
 
 Theorem gt3 : not_equilibrium (actionpair silent silent) utility2.
-(*write your answer here*)
+Proof.
+    unfold not_equilibrium.
+    exists (actionpair betray silent).
+    left. split; reflexivity.
+Qed.
 
 
 (*
@@ -311,8 +345,14 @@ is a sufficient condition for being an equilibrium.
 
 Theorem gt4 : forall (s : strategy) (u : player -> strategy -> nat), 
 dominant_strategy s u -> equilibrium s u.
-(*write your answer here*)
-*)
+Proof.
+    intros s u Hdom.
+    unfold dominant_strategy in Hdom.
+    unfold equilibrium.
+    intros s'. split; intros Hfixed.
+    - apply Hdom.
+    - apply Hdom.
+Qed.
 
 (* ################################################################# *)
 
@@ -349,7 +389,6 @@ Qed.
 
 (* ################################################################# *)
 
-(* Disabled: items 4 through 7.
 (*
 4. (5pts TOTAL). LOGIC: Let's do some logic !
 *)
@@ -359,7 +398,12 @@ Qed.
 *)
 
 Theorem logic1 : forall (A B : Prop), (A /\ B -> False) -> A -> (B -> False).
-(*write your answer here*)
+Proof.
+    intros A B HnotAB HA HB.
+    apply HnotAB. split.
+    - exact HA.
+    - exact HB.
+Qed.
 
 
 (*
@@ -367,7 +411,14 @@ Theorem logic1 : forall (A B : Prop), (A /\ B -> False) -> A -> (B -> False).
 *)
 
 Theorem logic2 : forall (A B : Prop), (A /\ B -> False) <-> (A -> (B -> False)).
-(*write your answer here*)
+Proof.
+    intros A B. split.
+    - apply logic1.
+    - intros H [HA HB].
+      apply H.
+      + exact HA.
+      + exact HB.
+Qed.
 
 
 (*
@@ -380,7 +431,16 @@ Axiom axtwo : forall (A B : Prop), ((A -> False) -> B) -> ((B -> False) -> A).
 
 Theorem logic3 : forall (A B C D : Prop),
   (((A -> C) /\ ((B -> False) -> D)) /\ ((C /\ D) -> False)) -> (A -> C) /\ (C -> B).
-(*write your answer here*)
+Proof.
+    intros A B C D [[HAC HnotBD] HnotCD]. split.
+    - exact HAC.
+    - intros HC.
+      apply (axtwo B (C /\ D)).
+      + intros HnotB. split.
+        * exact HC.
+        * apply HnotBD. exact HnotB.
+      + exact HnotCD.
+Qed.
 
 
 (*
@@ -388,7 +448,7 @@ Theorem logic3 : forall (A B C D : Prop),
 *)
 
 Definition excluded_middle : Prop := 
-(*write your answer here*)
+    forall (P : Prop), P \/ (P -> False).
 
 (*
 4.5 (1pt). Assuming excluded_middle, prove the other direction of
@@ -397,7 +457,13 @@ De Morgan's Law, which also cannot be proven using constructivist assumptions.
 
 Theorem logic4 : forall (P Q : Prop), 
   excluded_middle -> (P -> False) /\ (Q -> False) -> ((P \/ Q) -> False).
-(*write your answer here*)
+Proof.
+    (* This direction of De Morgan's law is constructive, so the
+       supplied excluded_middle assumption is not needed. *)
+    intros P Q HEM [HnotP HnotQ] [HP | HQ].
+    - apply HnotP. exact HP.
+    - apply HnotQ. exact HQ.
+Qed.
 
 
 (* ################################################################# *)
@@ -537,6 +603,7 @@ Proof.
     - reflexivity.
 Qed.
 
+(* Disabled: items 6 and 7.
 (*
 6. (7pts TOTAL). PERCEPTRON. For data science fans, here we'll verify the simplest
 neural net, which is the perceptron. 
