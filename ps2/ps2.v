@@ -17,7 +17,11 @@ Example one :
     X := 3
   {{ Y = X }}.
 Proof.
-Admitted.
+  eapply hoare_consequence_pre.
+  - apply hoare_asgn.
+  - unfold assert_implies, assertion_sub, t_update.
+    intros st H. simpl in *. exact H.
+Qed.
 
 (*1pt. *)
 Example two : 
@@ -25,7 +29,11 @@ Example two :
     X := X + 1
   {{ Y = X }}.
 Proof.
-Admitted.
+  eapply hoare_consequence_pre.
+  - apply hoare_asgn.
+  - unfold assert_implies, assertion_sub, t_update.
+    intros st H. simpl in *. exact H.
+Qed.
 
 (*1pt. *)
 Example three : 
@@ -33,7 +41,11 @@ Example three :
   X := Y + 3
   {{ X > 3 }}.
 Proof.
-Admitted.
+  eapply hoare_consequence_pre.
+  - apply hoare_asgn.
+  - unfold assert_implies, assertion_sub, t_update.
+    intros st H. simpl in *. lia.
+Qed.
 
 (*1pt. *)
 Example four : 
@@ -41,7 +53,11 @@ Example four :
   X := X + 1
   {{ X > 0 }}.
 Proof.
-Admitted.
+  eapply hoare_consequence_pre.
+  - apply hoare_asgn.
+  - unfold assert_implies, assertion_sub, t_update.
+    intros st H. simpl in *. lia.
+Qed.
 
 (*1pt. *)
 Example five : 
@@ -50,7 +66,16 @@ Example five :
   X := X + 2
   {{ X > 5 }}.
 Proof.
-Admitted.
+  eapply hoare_seq with (Q := {{ X > 3 }}).
+  - eapply hoare_consequence_pre.
+    + apply hoare_asgn.
+    + unfold assert_implies, assertion_sub, t_update.
+      intros st H. simpl in *. lia.
+  - eapply hoare_consequence_pre.
+    + apply hoare_asgn.
+    + unfold assert_implies, assertion_sub, t_update.
+      intros st H. simpl in *. lia.
+Qed.
 
 (*1pt. *)
 Axiom axone: forall X a (st : state), ((st X > a) /\ (st X <=? a) = true) -> False.
