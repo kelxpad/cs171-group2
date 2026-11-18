@@ -1,0 +1,1923 @@
+diff --git a/LLM_Logs/clarifications.md b/LLM_Logs/clarifications.md
+new file mode 100644
+index 0000000..6770b90
+--- /dev/null
++++ b/LLM_Logs/clarifications.md
+@@ -0,0 +1,433 @@
++# CS 140 Project 1 — Forum Clarifications
++
++> **Last reviewed:** 2026-11-12 (final forum compilation, supplied instructor replies through Thu Nov 12, 12:05 AM, Asia/Manila).  
++> **Purpose:** Faithful, anonymized compilation of CS 140 Project 1 forum clarifications for the group and coding assistants.  
++> **Authority:** Refer to the official Project 1 v2 specification and the original UVLe threads for full context. Only instructor replies are authoritative; student questions and notes are not course requirements. This is the final forum compilation as supplied; later specification changes, if any, would still take precedence.  
++> **AI use:** This compilation was prepared with AI assistance; declare its use and preserve/export full, unaltered AI session transcripts under `LLM_Logs/` as required by §4.7. The instructor's 2026-11-02 forum answer specifically requests that the generated Markdown file be kept in `LLM_Logs/`.
++
++## Instructions for Codex and contributors
++
++- Read relevant items before planning or modifying the scheduler, syscalls, instrumentation, and tests.
++- Apply each ruling only to its stated phase or policy. Distinguish **instructor-confirmed** content from **interpretation or unresolved questions**.
++- Where a later instructor reply corrects an earlier one, follow the correction and preserve the history in the relevant entry.
++- Do not infer guarantees beyond what the instructor said. When the specification or answer is ambiguous, flag it rather than silently choosing a rule.
++- This is a *reference compilation*, not authorization for AI to generate large implementation sections. Group members remain responsible for understanding their code and documenting AI use.
++- For the exact wording and provenance, search the UVLe forum by the **thread title and reply timestamp** below; links were not supplied in the pasted export.
++
++## Quick index
++
++| ID | Forum thread | Instructor reply (2026) | Scope |
++|---|---|---|---|
++| CL-01 | (Phase 2+) Preemption | Oct 27–28; Nov 10, 7:12 PM; Nov 11, 10:58 PM | Phases 2+; wake/fork preemption timing |
++| CL-02 | README.md Code Changes Documentation; README clarification | Oct 28, 6:24 PM; Nov 11, 8:22 AM | README content and detail |
++| CL-03 | behavior for vanilla RR; Vanilla Scheduling Clarifier | Oct 29, 10:46 PM; Nov 10, 7:18 PM | Vanilla RR and `setburst` |
++| CL-04 | set_burst other attribute behavior | Oct 29, 10:48 PM | `setburst` |
++| CL-05 | Phase 1 edge case | Oct 29, 10:51 PM | Phase 1; repeated `setburst` |
++| CL-06 | [Phase 4] Calculating Virtual Runtime of a Process Group | Oct 30, 4:01 PM | Phase 4+ group accounting |
++| CL-07 | multi-CPU clarifications | Oct 30, 4:02 PM; Nov 5, 11:13 AM | All phases/tests; Makefile |
++| CL-08 | Clarification for detecting sh and init processes | Oct 31, 9:17 PM | Critical-process refresh |
++| CL-09 | [Phases 3-6] Tiebreaking for two processes with equal ERBT | Oct 31, 9:21 PM | Phases 3–6 |
++| CL-10 | [AI Usage] Compiling forum posts into `clarifications.md` | Nov 2, 10:46 AM | AI use/document placement |
++| CL-11 | [Phase 4] Clarification on preemption conditions | Nov 2, 11:03 AM; Nov 11, 11:18/11:55 PM | Phases 4–6; group/process ties in preemption |
++| CL-12 | [Phase 4] Definition of initial processes | Nov 3, 12:43 PM | Phase 4 static group assignments |
++| CL-13 | Preemption Clarification | Nov 3, 4:30 PM; Nov 12, 12:05 AM | `setburst` unconditional yield |
++| CL-14 | [Phase 6] Tracking I/O Ticks | Nov 5, 5:20 PM | Phase 6 I/O accounting |
++| CL-15 | [Phase 4] Tie-breaking Criteria for Groups with Equal Virtual Runtimes | Nov 6, 6:25 AM; Nov 11, 11:18 PM | Group selection and preemption ties |
++| CL-16 | [Documentation] Use of DCS Git repository for storing documentation code | Nov 6, 12:28 PM | Repository contents |
++| CL-17 | Project Recording Clarification | Nov 7, 10:12 PM | Video documentation |
++| CL-18 | schedlog Behavior | Nov 9, 5:45 AM | `schedlog` timer and vanilla policy label |
++| CL-19 | Vanilla Scheduling Clarifier | Nov 9, 5:47 AM; Nov 10, 7:18 PM | Invalid-argument consistency; valid `setburst` under vanilla |
++| CL-20 | setburst clarification | Nov 9, 6:04 AM; Nov 10, 8:53 PM | Killed flag, immediate context switch, post-kill ticks |
++| CL-21 | Occuring on the Same Tick Behavior | Nov 9, 10:57 AM | Tick accounting/preemption order |
++| CL-22 | Section 4.3 concerns; Testing & Analysis Clarification | Nov 9, 10:59 AM and 9:21 PM | Testing required in highest declared branch |
++| CL-23 | [Phase 5] Effect of setshares() on accumulated group vruntime | Nov 9; Nov 10, 9:43 AM; Nov 11, 11:22 PM | Fractional vruntime; printing precision |
++
++| CL-24 | Bad Argument in QEMU for Scheduling | Nov 9, 8:42 PM | Invalid `SCHEDULING_POLICY` |
++| CL-25 | Testing & Analysis Clarification | Nov 9, 9:21 PM | Testing in declared branch |
++| CL-26 | Adding arguments for "make qemu" | Oct 22, 3:13 PM; Nov 9, 9:54 PM | Makefile policy selection; clean |
++| CL-27 | [Phase 5] Clarification on yielding in setgroup and groupfork | Nov 10, 4:06 PM | `setgroup` versus `groupfork` |
++| CL-28 | Test Case Clarification | Nov 10, 7:15/9:00 PM | Other syscalls; lab citations |
++| CL-29 | Clarification on README Filename | Nov 11, 8:10 AM | Keep xv6 `README`; add `README.md` |
++| CL-30 | [Phases 3-6] Clarifications Regarding results.py | Nov 11, 8:19 AM | Plot generation and incomplete runs |
++| CL-31 | README clarification | Nov 9, 8:37 PM; Nov 11, 8:22 AM | Brief README entries |
++| CL-32 | Questions on Project Documentation Items | Nov 11, 11:17 AM | PDF items 7/16; cross-reference |
++| CL-33 | [Phase 5+] Behavior of setshares() on invalid arguments | Nov 11, 1:55 PM | Invalid `setshares`; `setgroup` validation |
++| CL-34 | Total Burst Time of a Child Process | Nov 11, 3:56 PM | Child burst initialization |
++| CL-35 | Further clarification on vruntime | Nov 11, 8:51 AM/4:29 PM | Vruntime explicit field and accuracy |
++| CL-36 | [Phases 3-6] schedlog format under RR/STCF and printing in test programs | Nov 11, 3:00/10:40 PM | Phase/policy log format; test prints |
++| CL-37 | [Phase 3+] runner.sh number of runs | Nov 11, 10:36/10:58 PM | 10 runs; 20 acceptable |
++| CL-38 | General clarifications on killing processes | Nov 11, 11:09 PM | Killed flag and group accounting |
++
++## Confirmed clarifications
++
++### CL-01 — Wake/fork preemption checks and safe yielding (Phases 2+)
++
++**Source:** `(Phase 2+) Preemption`, instructor replies Tue Oct 27 12:01 PM; Wed Oct 28 12:00 PM; Tue Nov 10 3:46 PM and 7:12 PM; Wed Nov 11 10:58 PM.
++
++**Instructor-confirmed:**
++- Creating or waking a process calls for a **preemption check**, but does **not automatically require a yield** if the newly eligible process does not take precedence.
++- The Oct 28 answer says process-level ties are normally resolved during scheduler selection and compares RUNNABLE processes' ERBT against the running process's ERBT (effectively its RBT since its TIQ is zero).
++- In the Nov 10 follow-up, the instructor expressly chose **Sequence B**: `wakeup → check for shorter RBT → preempt → next tick`, rather than always waiting for the following timer tick.
++- In the Nov 11 follow-up, a student asked whether the check can happen on wake/fork while the actual **yield occurs on a safer path**, such as when ticks increments, to avoid interrupt/locking panics. The instructor answered **“Yes.”** Thus do not assume a yield is safe or mandatory directly inside every `wakeup`/`fork` execution path.
++
++**Reply evolution/caution:** The original Oct 27 answer suggested waiting until the next timer interrupt, but the Nov 10 answer preferred checking upon wakeup, and the Nov 11 answer permitted deferred yielding on a safer path. The earlier Oct 27 reply suggesting unconditional yielding on wakeup was expressly corrected Oct 28. Preserve all three distinctions: *check timing*, *whether preemption is warranted*, and *safe point for yielding*. The replies do not specify one exact kernel mechanism.
++
++**Related:** CL-09 (process tie-break), CL-11 (grouped preemption including ties), CL-21 (tick decrement first), CL-13 (`setburst` always yields).
++
++### CL-02 — Phase README scope and acceptable level of detail
++
++**Sources:** `README.md Code Changes Documentation`, instructor reply Wed Oct 28 6:24 PM; `README clarification`, replies Mon Nov 9 8:37 PM and Wed Nov 11 8:22 AM.
++
++**Instructor-confirmed:** Each phase's `README.md` documents **all deviations from original xv6**, not only the preceding phase's changes. Code snippets and detailed source walkthroughs are **not required** in the README; short per-file descriptions identifying added helpers and modified functions suffice. Reserve in-depth implementation explanation for the highest-phase PDF documentation.
++
++**Example style endorsed in the thread (paraphrased):** For `kernel/proc.c`, note a newly added helper and its purpose, and that `scheduler()` was modified to invoke it. See CL-29 for the separate `README` filename issue.
++
++### CL-03 — Burst tracking and `setburst` under vanilla round robin
++
++**Sources:** `behavior for vanilla RR`, instructor reply Thu Oct 29 10:46 PM; `Vanilla Scheduling Clarifier`, instructor reply Tue Nov 10 7:18 PM.
++
++**Instructor-confirmed:** Under vanilla xv6 scheduling, **burst times need not be tracked or refreshed**, and `ticks_left` / `ticks_consumed` may be printed as **0**. The later instructor reply says **`setburst` should not have an effect under vanilla scheduling**: vanilla is expected to behave like vanilla xv6 except for `schedlog`.
++
++**Important distinction:** CL-19 also confirms that **invalid-argument validation and its consequences** remain consistent across scheduling policies. Thus the lack of a scheduling effect for a **valid** `setburst` in vanilla should not be read as permission to ignore specified invalid-input handling.
++
++**Related:** CL-18 (vanilla's `STCF` log label), CL-19 (argument validation).
++
++### CL-04 — `setburst` resets remaining and consumed values
++
++**Source:** `set_burst other attribute behavior`, instructor reply Thu Oct 29 10:48 PM.
++
++**Instructor-confirmed:** Calling `setburst(burst_ticks)` sets remaining burst to **`burst_ticks`** and resets ticks consumed to **0**, even if the process had already consumed CPU time.
++
++**Reference:** This aligns with spec §3.3. It does **not** say to subtract past consumed CPU ticks from the new burst budget.
++
++### CL-05 — Repeated burst extensions are allowed
++
++**Source:** `Phase 1 edge case`, instructor reply Thu Oct 29 10:51 PM.
++
++**Instructor-confirmed:** A process may repeatedly call `setburst` before exhausting its current burst, thereby indefinitely extending its execution. This is intended, and **no mechanism is required in Phase 1 to prevent it**.
++
++**Boundary:** This does not waive the specified behavior for invalid burst values or for actually exhausting a burst budget.
++
++### CL-06 — Group virtual runtime persistence and type
++
++**Source:** `[Phase 4] Calculating Virtual Runtime of a Process Group`, instructor reply Fri Oct 30 4:01 PM.
++
++**Instructor-confirmed:** “Virtual runtime is maintained and never reset” means the group retains its accumulated CPU tick history and virtual-runtime value even if no processes are currently assigned. The instructor endorsed the **second interpretation** in the question, **not** adding the entire freshly calculated formula to an already accumulated vruntime on every update. `vruntime` should be stored as an **integer**.
++
++**Reference:** Spec §2.5 defines `vruntime_g = total_cpu_ticks_g × 1024 / shares_g`.
++
++**Further clarification:** See CL-23 (Nov 9): changing group shares affects **future CPU ticks only**; preserve past vruntime and account for fractional increments without simply discarding them. Neither instructor reply prescribes a specific accumulator design.
++
++### CL-07 — Single-CPU scope
++
++**Source:** `multi-CPU clarifications`, instructor replies Fri Oct 30 4:02 PM and Thu Nov 5 11:13 AM.
++
++**Instructor-confirmed:** **All phases will use one CPU.** The instructor also confirmed it is acceptable to **modify the Makefile so xv6 runs with `CPUS=1` by default** (Nov 5 reply).
++
++**Reference:** Spec §4.3 requires `CPUS=1` in all test/run scripts. No multi-CPU behavior needs to be inferred from this answer. See CL-22 for which phases must supply the testing/analysis files.
++
++### CL-08 — Identifying `init` and `sh` by name
++
++**Source:** `Clarification for detecting sh and init processes`, instructor reply Sat Oct 31 9:17 PM.
++
++**Instructor-confirmed:** In response to whether comparing process names using `strncmp(p->name, "init", sizeof("init"))` and `strncmp(p->name, "sh", sizeof("sh"))` would suffice, the instructor answered: **“You are free to implement it like that.”**
++
++**Caution:** This is permission to use that approach, **not a detailed correctness guarantee** for every edge case. A student-supplied note said the group already uses `strncmp` in `account_cpu_tick()` and expressed concern about that ambiguity; that note is not an instructor ruling.
++
++**Test consideration (derived):** Test that the actual `init` and `sh` processes are not killed upon budget exhaustion and that unrelated names are not accidentally treated as critical processes.
++
++### CL-09 — ERBT tie-breaking (Phases 3–6)
++
++**Source:** `[Phases 3-6] Tiebreaking for two processes with equal ERBT`, instructor reply Sat Oct 31 9:21 PM.
++
++**Instructor-confirmed:** If multiple processes have equal **ERBT**, use the specification's normal tie-breakers: **earlier creation time**, then **lower PID**. This also applies to selection *within a group* in Phases 4–6.
++
++**Reference:** Spec §§2.3–2.5. Tiebreaking at selection should not be confused with a reason to preempt a running process (CL-01).
++
++### CL-10 — AI compilation and Markdown location
++
++**Source:** `[AI Usage] Compiling forum posts into `clarifications.md``, instructor reply Mon Nov 2 10:46 AM.
++
++**Instructor-confirmed:** AI-assisted compilation of forum clarifications is acceptable **if AI is used only for compilation, not for generating entire chunks of code based on the clarifications**, provided that AI usage is **declared**, **student identifiers are removed**, and the **generated Markdown file is placed inside the `LLM_Logs` folder**.
++
++**Action:** Keep this file as `LLM_Logs/clarifications.md`, rather than a root-level generated copy. Keep unaltered AI transcript exports as separately required by spec §4.7. Student names/IDs were omitted from this compilation; the original pasted export did not include visible names.
++
++### CL-11 — Two-tier preemption and tie-breaking (Phases 4–6)
++
++**Source:** `[Phase 4] Clarification on preemption conditions`, replies Mon Nov 2 11:03 AM; Wed Nov 11 11:18 PM and 11:55 PM.
++
++**Instructor-confirmed examples from Nov 2:**
++
++| Case | Answer |
++|---|---|
++| Ready process in another group with lower vruntime | **Preemption** |
++| Ready process in same group with lower ERBT | **Preemption** |
++| Other group has lower process ERBT but **higher group vruntime** | **No preemption** |
++| Running group's vruntime rises above another runnable group's | **Preemption** |
++
++**Later explicit clarification:** The preemption check becomes **two-tiered for Phases 4–6**. First compare eligible groups' vruntime; group-level ties select **lower group ID**. Then compare processes within the selected group by ERBT; process ties use **earlier creation time, then lower PID**. The Nov 11 11:55 PM reply states that a running process is preempted if some other ready process takes precedence under this **full two-tier selection mechanism plus tie-breaking**.
++
++**Correction to earlier compilation:** Previous caution that only *strictly lower* group vruntime/ERBT could trigger preemption is **no longer supported** for grouped phases; the later answer includes ties that make a different process the preferred choice. This supersedes earlier uncertainty Q-04/Q-05. Preserve Phase 2–3 behavior separately under CL-01 and CL-09.
++
++**Related:** CL-15 (group ties), CL-09 (process ties), CL-01 (safe wake/fork yielding), CL-13 (`setburst`), CL-23 (accurate vruntime).
++
++### CL-12 — Initial processes are exempt from Phase 4 modulo assignment
++
++**Source:** `[Phase 4] Definition of initial processes`, instructor reply Tue Nov 3 12:43 PM.
++
++**Instructor-confirmed:** For Phase 4, the **initial processes are `init` and `sh`**, and both belong to **Group 0**. The static group assignment using a process's PID modulo the number of groups **only applies to processes other than `init` and `sh`**.
++
++**Reference:** Resolves the apparent tension between spec §2.5 (initial processes in Group 0) and §4.1.4 (static `pid % N_GROUPS` assignment).
++
++**Implementation/test implications (derived):** Verify `init` and `sh` are assigned Group 0 even if their PIDs would otherwise map elsewhere under modulo; test that other processes receive the specified modulo assignment.
++
++### CL-13 — `setburst` always calls `yield()`, including Phase 1
++
++**Source:** `Preemption Clarification`, instructor replies Tue Nov 3 4:30 PM and Thu Nov 12 12:05 AM.
++
++**Instructor-confirmed:** Disregard **the second preemption bullet** in spec §2.3 describing `setburst` relative to another running process; follow **§3.3** instead. `setburst` is voluntary, and **even in non-preemptive Phase 1 it must call `yield()`** after a valid update. External timer-based preemption checks do not apply in Phase 1.
++
++**Final Nov 12 confirmation:** A process calling `setburst` **must yield regardless of whether a different process would be chosen**. Checking first and skipping the `yield()` when no preemption is needed does **not** satisfy this ruling.
++
++**Boundary:** The forum did not expressly address whether a call with invalid arguments reaches the same normal yield path; invalid handling remains specified separately in §3.3 and CL-19.
++
++### CL-14 — I/O ticks correspond to time in `SLEEPING` state (Phase 6)
++
++**Source:** `[Phase 6] Tracking I/O Ticks`, instructor reply Thu Nov 5 5:20 PM.
++
++**Instructor-confirmed:** For Phase 6's I/O-duration accounting, the instructor confirmed that a process's **I/O duration is the number of ticks it has spent in the `SLEEPING` state**.
++
++**Reference:** Spec §4.1.6's group I/O tracking and shares-boosting rules. The original forum question cited the spec's reminder that `sleep(n)` consumes `n` ticks.
++
++**Implementation/test implications (derived):** Verify sleeping time contributes to group I/O tick accounting and that the boost logic observes the specified I/O-to-CPU ratio. The instructor did not supply a detailed tick-accounting algorithm.
++
++### CL-15 — Group ties choose lower group ID; ties can affect grouped preemption
++
++**Sources:** `[Phase 4] Tie-breaking Criteria for Groups with Equal Virtual Runtimes`, reply Fri Nov 6 6:25 AM; `[Phase 4] Clarification on preemption conditions`, reply Wed Nov 11 11:18 PM and 11:55 PM.
++
++**Instructor-confirmed:** Among eligible groups with the same lowest vruntime, choose the **lower group ID**. The later Phase 4–6 preemption ruling (CL-11) says the full two-tier selection mechanism **including tie-breakers** determines whether a different runnable process takes precedence over the running one; do not treat a vruntime tie as automatically forbidding preemption.
++
++**Related:** CL-09 for process ERBT ties, CL-11 for preemption.
++
++### CL-16 — Documentation source files may be stored in DCS Git
++
++**Source:** `[Documentation] Use of DCS Git repository for storing documentation code`, instructor reply Fri Nov 6 12:28 PM.
++
++**Instructor-confirmed:** It is acceptable to store files **other than xv6/project code** in the DCS Git repository; the forum specifically proposed **Typst documentation** as an example.
++
++**Boundary:** This permission does not replace the official README, PDF, or video deliverable requirements and does not change the specified location of AI-generated `clarifications.md` under `LLM_Logs/` (CL-10).
++
++### CL-17 — Separately recorded presentation clips may be combined
++
++**Source:** `Project Recording Clarification`, instructor reply Sat Nov 7 10:12 PM.
++
++**Instructor-confirmed:** Group members **may record their voice-over/video portions separately and combine the individual videos later** into the project recording.
++
++**Reference:** Spec §4.5's video deliverable rules still apply, including individual presentation participation and the stated format/time requirements.
++
++### CL-18 — `schedlog` timer replacement and vanilla policy label
++
++**Source:** `schedlog Behavior`, instructor reply Mon Nov 9 5:45 AM.
++
++**Instructor-confirmed:** When a process calls `schedlog(N)` and another calls `schedlog(M)`, the latter call **overwrites** the prior duration: `schedlog` lasts **M ticks**, not N + M. Under vanilla xv6 round-robin scheduling, the `<policy>` field in `schedlog` is still **`STCF`**, not `RR` or `VANILLA`.
++
++**Reference:** Spec §3.2 describes the phase-specific format and explicitly prescribes `STCF` for vanilla output. CL-03 allows vanilla `ticks_left` and `ticks_consumed` to be zero.
++
++**Test implications (derived):** Activate `schedlog` twice with different durations and verify the later duration takes effect; check the `STCF` policy token in vanilla scheduler logs.
++
++### CL-19 — Consistent invalid-argument behavior across scheduling policies
++
++**Source:** `Vanilla Scheduling Clarifier`, replies Mon Nov 9 5:47 AM and Tue Nov 10 7:18 PM.
++
++**Instructor-confirmed:** Syscall argument validation and the **consequences of invalid arguments** must be consistent across vanilla RR, STCF, and grouped STCF. Separately, **valid `setburst` should not affect vanilla's scheduling/burst enforcement**; vanilla must otherwise work like original xv6 with `schedlog`.
++
++**Per-syscall requirements (spec §§3.3–3.6):** Invalid `setburst`, `setgroup`, and `groupfork` have their specified `-1`/killed consequences; invalid `setshares` returns `-1` **without killing the caller**, as further confirmed in CL-33. Do not conflate error validation with normal scheduling effects.
++
++### CL-20 — Exhausted burst: killed flag, immediate switch, no post-kill accounting
++
++**Source:** `setburst clarification`, instructor replies Mon Nov 9 6:04 AM and Tue Nov 10 8:53 PM.
++
++**Instructor-confirmed:** On burst exhaustion, **mark the process killed**, not by calling `exit()` directly inside the timer interrupt. **Trigger a context switch immediately after marking it killed**. A marked-killed process remains **eligible to be scheduled** so that it can reach normal termination handling. **Do not count CPU ticks consumed after it was marked killed**. CL-38 extends the last rule to group CPU-tick accounting and confirms ordinary xv6 killing handling is sufficient.
++
++**Boundary:** Eligibility for scheduling does not mean it can exceed its budget through normal CPU tick accounting; the late reply specifically excludes post-kill consumption.
++
++### CL-21 — On a timer tick, decrement the running process's remaining burst first
++
++**Source:** `Occuring on the Same Tick Behavior` (forum spelling), instructor reply Mon Nov 9 10:57 AM.
++
++**Instructor-confirmed:** At a CPU tick, **decrement the remaining burst time of the currently running process first**, before determining whether a ready process should preempt it.
++
++**Test implications (derived):** Check accounting and preemption order when a shorter job becomes ready on the same tick, including when the running process's budget reaches zero. Do not infer other interrupt-ordering details not addressed by the reply.
++
++### CL-22 — Testing files: phase applicability and highest declared branch
++
++**Sources:** `Section 4.3 concerns`, reply Mon Nov 9 10:59 AM; `Testing & Analysis Clarification`, reply Mon Nov 9 9:21 PM.
++
++**Instructor-confirmed:** Spec §4.3 testing/analysis is for **Phases 3–6**, not Phases 1–2. **Either** `sanity_check.sh` **or** `sanity_check.py` suffices. Testing and analysis files are **required only in the highest declared branch**; including them in lower branches is optional but can serve as a **safety net** against deductions under §4.4.
++
++**Caution:** The baseline §4.3 commands, CPU configuration and relevant user-test expectations remain applicable. CL-30 explains plot requirements for programs absent from an earlier phase; CL-37 clarifies acceptable run counts.
++
++### CL-23 — `setshares`: historical vruntime, fractional precision and display
++
++**Source:** `[Phase 5] Effect of setshares() on accumulated group vruntime`, instructor replies Mon Nov 9 6:00 AM, 1:40 PM; Tue Nov 10 9:43 AM; Wed Nov 11 11:22 PM.
++
++**Instructor-confirmed:** Changing shares affects **future CPU ticks only**; preserve accumulated vruntime. The implementation must **keep track of fractional vruntime increments** rather than dropping them on every tick. For **printing** vruntime, limit output to **two decimal places**. Either **rounding or truncating** to two decimals is permitted, with some display inaccuracy allowed.
++
++**Detail:** The Nov 11 11:22 PM answer explicitly accepted *either* printing 6.78 or 6.77 for an underlying 6.7777-type result. This **display allowance should not be mistaken for permission to ignore fractional increments in internal accounting**.
++
++**Further clarification:** CL-35 confirms explicit group `vruntime` storage, accumulating each tick under the contemporaneous shares and permissible bounded numerical error in integer arithmetic. The instructor has not mandated a particular fixed-point implementation.
++
++### CL-24 — Invalid scheduling policy values are untested
++
++**Source:** `Bad Argument in QEMU for Scheduling`, instructor reply Mon Nov 9 8:42 PM.
++
++**Instructor-confirmed:** Invalid `SCHEDULING_POLICY` strings (e.g. `6767`) may be handled however the group chooses, including exiting or falling back to vanilla xv6. Only **valid policy choices** (vanilla xv6, STCF, GROUP_STCF) will be tested.
++
++**Boundary:** Do not weaken requirements for valid policies or the default vanilla selection.
++
++### CL-25 — Required analysis is confined to highest declared branch
++
++**Source:** `Testing & Analysis Clarification`, instructor reply Mon Nov 9 9:21 PM.
++
++**Instructor-confirmed:** Testing/analysis files need only exist in the **highest declared phase branch**. Including them in lower branches is optional and recommended as a safeguard if the highest branch fails grading. This also updates CL-22; do not misread “Phases 3+” as “every branch from Phase 3 onward must contain all test files.”
++
++### CL-26 — `make qemu` policy parameter and recompilation via `make clean`
++
++**Source:** `Adding arguments for "make qemu"`, replies Thu Oct 22 3:13 PM and Mon Nov 9 9:54 PM.
++
++**Instructor-confirmed:** Add `SCHEDULING_POLICY` as a `make qemu` parameter; external implementation references are allowed if cited. It is acceptable if switching policies requires `make clean`, **provided that testing/analysis scripts automatically invoke `make clean` when needed**.
++
++**Boundary:** This does not relax the requirement that scripts correctly build and exercise different policies.
++
++### CL-27 — `setgroup` and `groupfork`: limited guidance about yielding
++
++**Source:** `[Phase 5] Clarification on yielding in setgroup and groupfork`, reply Tue Nov 10 4:06 PM.
++
++**Instructor-confirmed wording (paraphrased):** `setgroup` changes the calling process's group without creating or waking a process; `groupfork` behaves like `fork`. The instructor **did not directly say** whether either syscall must call `yield()` or perform an immediate preemption check, leaving that to be derived from their effects and other scheduling rules.
++
++**Do not overstate:** Use CL-01/CL-11 for preemption triggered by process creation, but do **not** claim this reply specifically mandates an unconditional yield in `setgroup` or `groupfork`.
++
++### CL-28 — Other syscall tests encouraged; course-lab citations optional
++
++**Source:** `Test Case Clarification`, instructor replies Tue Nov 10 7:15 PM and 9:00 PM.
++
++**Instructor-confirmed:** Explicitly testing whether *other* syscalls break is **not required**, but strongly **encouraged** because testers may check unlisted cases and broken vanilla `fork()`/`exec()` incur penalties. Citing insights from lab exercises/problem sets is **technically optional**, though welcome in documentation.
++
++**Boundary:** This does not waive required §4.3.2 sanity checks or reference disclosure for other external resources.
++
++### CL-29 — Keep xv6 `README` untouched; add a separate `README.md`
++
++**Source:** `Clarification on README Filename`, instructor reply Wed Nov 11 8:10 AM.
++
++**Instructor-confirmed:** **Create a separate `README.md`** for required changes and **leave xv6's existing `README` file untouched**. The original Makefile may depend on `README` for `fs.img`; renaming or replacing it can cause build failure.
++
++**Related:** CL-02 on README content.
++
++### CL-30 — `results.py` plotting expectations
++
++**Source:** `[Phases 3-6] Clarifications Regarding results.py`, instructor reply Wed Nov 11 8:19 AM.
++
++**Instructor-confirmed (answers in question order):**
++1. No prescribed Python plotting library.
++2. Plots should be generated/stored per phase, but there is **no naming convention**.
++3. Choose an appropriate plot type/aggregation using your **best judgment**.
++4. Parsing logs similarly to Lab 2's `parse.py` is **the intended approach**.
++5. If a user test program **does not exist in an earlier phase**, it need not appear in that phase's plot.
++6. Only include **complete, successful runs**; re-run failures rather than analyzing incomplete logs.
++
++**Boundary:** Follow §4.3.4's metric requirements for each applicable phase; the instructor explicitly relaxed the “all seven programs” interpretation for phases where some programs are absent.
++
++### CL-31 — Brief per-file README descriptions suffice
++
++**Source:** `README clarification`, replies Mon Nov 9 8:37 PM and Wed Nov 11 8:22 AM.
++
++**Instructor-confirmed:** A concise list of file/function changes, such as adding a helper and invoking it from `scheduler()`, is sufficient. **No code snippets are required** in phase READMEs; explanations in depth belong in the highest-phase PDF.
++
++**Cross-reference:** CL-02 consolidates this guidance with the requirement to document every deviation from original xv6.
++
++### CL-32 — PDF documentation items 7 and 16 and reuse of explanations
++
++**Source:** `Questions on Project Documentation Items`, reply Wed Nov 11 11:17 AM.
++
++**Instructor-confirmed:** Item **7 should discuss process initialization only** (the reference to group assignment there was a typo). Explain **group assignment in item 16**. It is acceptable to refer back to an earlier item's detailed explanation rather than repeat all the detail (e.g. ERBT discussed in item 10 and referenced in item 14).
++
++### CL-33 — Invalid `setshares` preserves shares and does not kill
++
++**Source:** `[Phase 5+] Behavior of setshares() on invalid arguments`, reply Wed Nov 11 1:55 PM.
++
++**Instructor-confirmed:** If shares are nonpositive or the group ID is invalid, **leave the group's shares unchanged** and **do not mark the calling process killed** (spec §3.6 requires return `-1`). For `setgroup`, **validate arguments before attempting updates**; the specified invalid-group killed behavior still applies.
++
++**Related:** CL-19 (consistent invalid-argument handling across policies).
++
++### CL-34 — A child does not inherit the parent's modified burst budget
++
++**Source:** `Total Burst Time of a Child Process`, instructor reply Wed Nov 11 3:56 PM.
++
++**Instructor-confirmed:** A child created via `fork()` **does not inherit the parent's total burst time**; §2.2's default new-process burst behavior applies, even when the parent previously called `setburst`.
++
++**Caution:** This forum answer specifically addresses **total burst time**; do not automatically infer every other child's field without reading the spec.
++
++### CL-35 — Vruntime is an explicit accumulating field; integer arithmetic may approximate
++
++**Source:** `Further clarification on vruntime`, instructor replies Wed Nov 11 8:51 AM and 4:29 PM.
++
++**Instructor-confirmed:**
++- **Accumulate** group vruntime as a monotonically increasing counter, applying each tick's **shares at the moment the tick occurs**. Example: after 100 ticks at shares 100, then changing to shares 200 and consuming one tick, calculate `(100 × 1024)/100 + (1 × 1024)/200`, not `(101 × 1024)/200`.
++- **Keep `vruntime` as an explicit field** of each group. Other supporting integer fields may be used to account for fractional components.
++- Make computation and comparison **as accurate as practical with integer arithmetic**. Some inaccuracy is allowed if not too far off (instructor example: 10 versus true 10.5 acceptable; 15 versus 10.5 not acceptable).
++
++**Related:** CL-06 (persistence), CL-23 (fractional accounting and two-decimal display). Do not treat the numerical example as a formal tolerance guarantee.
++
++### CL-36 — `schedlog` format under RR/STCF and output from user tests
++
++**Source:** `[Phases 3-6] schedlog format under RR/STCF and printing in test programs`, replies Wed Nov 11 3:00 PM and 10:40 PM.
++
++**Instructor-confirmed:**
++- Under **vanilla RR and STCF**, print **only one Group 0 line**, including when grouped phases are implemented.
++- For **Phases 1–3**, vanilla RR and STCF use the specified **`|STCF|0(0,0),...`** format.
++- For **Phases 4–6**, **`|GROUP|...` is used only under GROUP_STCF**. Vanilla RR/STCF still print **`|STCF|...`**, not `|GROUP|`, with one Group 0 line.
++- **User test programs may print output.**
++
++**Related:** CL-18 (vanilla log label). The reply does not explicitly prescribe all individual field values in the Phase 4–6 STCF single-line output; retain the spec's applicable formatting obligations.
++
++### CL-37 — `runner.sh` normally generates 10 runs; existing 20-run logs permitted
++
++**Source:** `[Phase 3+] runner.sh number of runs`, replies Wed Nov 11 10:36 PM and 10:58 PM.
++
++**Instructor-confirmed:** The `N=20 ./runner.sh` invocation in §4.3 was a **typo**; `runner.sh` is intended to perform **10 runs**. A group that already generated **20 runs** may **retain those logs and plots** without redoing them for only 10 runs.
++
++**Boundary:** Do not infer that all arbitrary run counts are acceptable; this specifically approves 10 intended and existing 20.
++
++### CL-38 — Marking processes killed is sufficient; stop post-kill CPU accounting
++
++**Source:** `General clarifications on killing processes`, reply Wed Nov 11 11:09 PM.
++
++**Instructor-confirmed:** Across the spec's “preemptively/forcibly killing” and invalid-argument cases, **marking the process killed is sufficient**; there is no need to invent additional process-killing machinery. Normal xv6 termination handling can complete afterward. **Do not increment the killed process's ticks consumed, nor its group's consumed CPU ticks, after it is marked killed.**
++
++**Related:** CL-20 separately mandates **an immediate context switch on burst exhaustion**, even though termination happens through normal killed checks.
++
++## Open points and limitations
++
++| ID | Item | Why still unresolved or implementation-dependent |
++|---|---|---|
++| Q-01 | Complete safety/correctness of name-based detection of `init` and `sh` | CL-08 permits `strncmp`, but does not guarantee every possible naming edge case. |
++| Q-06 | Exact placement of wake/fork preemption check and safe yield | CL-01 confirms check-on-event and allows safe-path yielding, but does not prescribe the exact xv6 implementation. |
++| Q-07 | Whether `setgroup` needs a preemption check or yield | CL-27 describes its behavior but deliberately leaves the conclusion to implementation reasoning; avoid inventing an explicit syscall rule. |
++| Q-08 | Exact fixed-point/remainder scheme and comparison precision for vruntime | CL-23/CL-35 require accounting for fractional ticks with acceptable bounded inaccuracy but specify no exact algorithm. |
++
++## Source provenance and update procedure
++
++- **Input:** User-supplied compiled forum snapshots through Nov 9 plus the final pasted forum export including newly added and bumped threads with instructor replies through Nov 12, 2026, 12:05 AM (Asia/Manila). This is the final user-supplied forum update.
++- **No forum URLs provided.** Preserve the thread titles and timestamps above to locate primary sources; do not fabricate links.
++- This file paraphrases instructor answers to avoid attributing student questions and interpretations to instructors. The short quotation in CL-08 is reproduced verbatim.
++- The supplied forum update is final. If the official project specification is amended independently, verify any newer authoritative requirements against this snapshot. Earlier correction history is retained.
++- **Documentation compliance:** Maintain per-branch root `README.md` files and the highest-phase documentation requirements (spec §§4.4–4.5). Include AI references and unaltered session PDF exports with the prescribed `LLM_Logs/<ConversationNumber>_<ToolUsed>_Purpose.pdf` convention (spec §4.7). This Markdown summary does not replace those exports.
++
++## Revision history
++
++| Date | Revision |
++|---|---|
++| 2026-11-02 | Initial verified compilation of 11 supplied threads; incorporated explicit instructor guidance about putting AI-generated Markdown inside `LLM_Logs/`. |
++| 2026-11-08 | Added CL-12–CL-17 from six new threads; updated CL-07 with Nov 5 Makefile permission; resolved the group-selection tie rule (formerly Q-02), added narrower tie/preemption caveat Q-05, and updated Phase 4 preemption caveats. |
++| 2026-11-09 | Added CL-18–CL-23 from six new threads; cross-referenced schedlog, validation, tick ordering, and testing rulings; updated CL-06 for future-only shares effects and fractional vruntime accounting; retired Q-03 as clarified while retaining the absence of an instructor-prescribed algorithm. |
++| 2026-11-12 | Final forum snapshot: added CL-24–CL-38 (15 newly supplied threads); updated bumped CL-01, CL-02, CL-03, CL-11, CL-13, CL-15, CL-19, CL-20, CL-22 and CL-23; reconciled late preemption/tie, vruntime, schedlog, killing and testing rulings; revised open questions. |
+diff --git a/Makefile b/Makefile
+index 75b96cd..8037368 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,19 @@
+ K=kernel
+ U=user
+ 
++# PHASE 1: Select Scheduling policy: RR, STCF, or GROUP_STCF
++SCHEDULING_POLICY ?= RR
++
++ifeq ($(SCHEDULING_POLICY),RR)
++POLICY_CFLAGS = -DSCHED_POLICY_RR
++else ifeq ($(SCHEDULING_POLICY),STCF)
++POLICY_CFLAGS = -DSCHED_POLICY_STCF
++else ifeq ($(SCHEDULING_POLICY),GROUP_STCF)
++POLICY_CFLAGS = -DSCHED_POLICY_GROUP_STCF
++else
++$(error Unknown SCHEDULING_POLICY '$(SCHEDULING_POLICY)'. Use RR, STCF, or GROUP_STCF)
++endif
++
+ OBJS = \
+   $K/entry.o \
+   $K/start.o \
+@@ -73,6 +86,7 @@ CFLAGS += -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-vprintf
+ CFLAGS += -I.
+ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+ CFLAGS += -Wno-unused-but-set-variable
++CFLAGS += $(POLICY_CFLAGS)
+ 
+ # Disable PIE when possible (for Ubuntu 16.10 toolchain)
+ ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
+@@ -141,6 +155,8 @@ UPROGS=\
+ 	$U/_wc\
+ 	$U/_zombie\
+ 	$U/_shutdown\
++	$U/_setbursttest\
++	$U/_schedlogtest\
+ 
+ fs.img: mkfs/mkfs README $(UPROGS)
+ 	mkfs/mkfs fs.img README $(UPROGS)
+@@ -162,7 +178,7 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
+ 	then echo "-gdb tcp::$(GDBPORT)"; \
+ 	else echo "-s -p $(GDBPORT)"; fi)
+ ifndef CPUS
+-CPUS := 3
++CPUS := 1
+ endif
+ 
+ QEMUOPTS = -machine virt -bios none -kernel $K/kernel -m 128M -smp $(CPUS) -nographic
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..0581c7f
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,766 @@
++# Phase 1
++
++## Group 11 - `SYS_getpid`
++
++- Aaron Xander H. Antazo   | 2024-02208 | THY/FVW1
++- Wigbert Amadeus N. Madla | 2024-06911 | THX/FRU2
++- Renz Sergio T. Pactolin  | 2024-13690 | THY/FVW3
++- Klex Felouise G. Padilla | 2024-00561 | THY/FVW1
++- Hanz Josef O. Vicencio   | 2024-02172 | THY/FVW1
++
++## Changes
++
++### Summary
++
++- set up `SCHEDULING_POLICY` environment variable logic (`Makefile`)
++- set up `SCHEDULING_POLICY` compilation flag logic (`Makefile`)
++- set up `SCHEDULING_POLICY` parameter logic (`kernel/param.h`)
++- add "Using Policy:" message to `xv6` startup (`kernel/main.c`)
++- register `schedlog` and `setburst` syscalls (`kernel/syscall.{c,h}`)
++- add `schedlog_start_tick` and `schedlog_duration` global variables (`kernel/proc.c`)
++- implement `schedlog_start` and `schedlog_print` helper functions (`kernel/proc.c`)
++- implement `schedlog` (using helper functions) and `setburst` syscalls (`kernel/sysproc.c`)
++- keep valid `setburst` calls without effect under vanilla RR, while retaining invalid-input handling across policies and unconditional yielding after valid STCF updates (forum clarifications CL-03, CL-19, CL-13)
++- add user-space wrapper for `setburst` and `schedlog` syscalls (`user/{user.h, usys.pl}`)
++- define STCF policy constants as per project specs (`kernel/stcf.h`)
++- add STCF policy tracking values to PCB `struct proc` (`kernel/proc.h`)
++- modify `allocproc` to initialize new tracking values in PCB (`kernel/proc.c`)
++- implement `account_cpu_tick` for tracking burst consumption (`kernel/proc.c`)
++- skip CPU tick accounting for processes already marked killed (forum clarification CL-38)
++- register `account_cpu_tick` and `schedlog_start` signatures (`kernel/defs.h`)
++- set up policy-dependent logic in `scheduler` related to selected scheduling policy (`kernel/proc.c`)
++- implment STCF scheduler with `schedlog_print` functionality (`kernel/proc.c`)
++- set up policy-dependent logic in `usertrap` and `kerneltrap` related to `yield`ing (`kernel/trap.c`)
++- on burst exhaustion in `kerneltrap`, yield immediately and defer termination to `usertrap` after the interrupted syscall resumes (forum clarification CL-20)
++- implement `schedlogtest` program (`user/schedlogtest.c`)
++- implement `setbursttest` program (`user/setbursttest.c`)
++- register `schedlogtest` and `setbursttest` user programs (`Makefile`)
++
++### Exhaustive Change List
++
++#### `Makefile`
++
++```diff
++diff --git a/Makefile b/Makefile
++index 75b96cd..c9e936e 100644
++--- a/Makefile
+++++ b/Makefile
++@@ -1,6 +1,19 @@
++ K=kernel
++ U=user
++ 
+++# PHASE 1: Select Scheduling policy: RR, STCF, or GROUP_STCF
+++SCHEDULING_POLICY ?= RR
+++
+++ifeq ($(SCHEDULING_POLICY),RR)
+++POLICY_CFLAGS = -DSCHED_POLICY_RR
+++else ifeq ($(SCHEDULING_POLICY),STCF)
+++POLICY_CFLAGS = -DSCHED_POLICY_STCF
+++else ifeq ($(SCHEDULING_POLICY),GROUP_STCF)
+++POLICY_CFLAGS = -DSCHED_POLICY_GROUP_STCF
+++else
+++$(error Unknown SCHEDULING_POLICY '$(SCHEDULING_POLICY)'. Use RR, STCF, or GROUP_STCF)
+++endif
+++
++ OBJS = \
++   $K/entry.o \
++   $K/start.o \
++@@ -73,6 +86,7 @@ CFLAGS += -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-vprintf
++ CFLAGS += -I.
++ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
++ CFLAGS += -Wno-unused-but-set-variable
+++CFLAGS += $(POLICY_CFLAGS)
++ 
++ # Disable PIE when possible (for Ubuntu 16.10 toolchain)
++ ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
++@@ -141,6 +155,8 @@ UPROGS=\
++ 	$U/_wc\
++ 	$U/_zombie\
++ 	$U/_shutdown\
+++	$U/_setbursttest\
+++	$U/_schedlogtest\
++ 
++ fs.img: mkfs/mkfs README $(UPROGS)
++ 	mkfs/mkfs fs.img README $(UPROGS)
++```
++
++#### `kernel/defs.h`
++
++```diff
++diff --git a/kernel/defs.h b/kernel/defs.h
++index aef7718..7b33522 100644
++--- a/kernel/defs.h
+++++ b/kernel/defs.h
++@@ -101,6 +101,8 @@ void            yield(void);
++ int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
++ int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
++ void            procdump(void);
+++int             account_cpu_tick(struct proc *); // PHASE 1 MODIFICATION
+++void            schedlog_start(int duration); // PHASE 1 MODIFICATION
++ 
++ // swtch.S
++ void            swtch(struct context*, struct context*);
++```
++
++#### `kernel/main.c`
++
++```diff
++diff --git a/kernel/main.c b/kernel/main.c
++index f0d3171..5a956ca 100644
++--- a/kernel/main.c
+++++ b/kernel/main.c
++@@ -13,6 +13,7 @@ main()
++   if(cpuid() == 0){
++     consoleinit();
++     printfinit();
+++    printf("Using Policy: %s\n", SCHEDULING_POLICY);
++     printf("\n");
++     printf("xv6 kernel is booting\n");
++     printf("\n");
++```
++
++#### `kernel/param.h`
++
++```diff
++diff --git a/kernel/param.h b/kernel/param.h
++index 80ec6d3..70560d3 100644
++--- a/kernel/param.h
+++++ b/kernel/param.h
++@@ -13,3 +13,16 @@
++ #define MAXPATH      128   // maximum file path name
++ #define USERSTACK    1     // user stack pages
++ 
+++
+++// PHASE 1
+++#include "stcf.h"
+++
+++#if defined(SCHED_POLICY_RR)
+++#define SCHEDULING_POLICY "RR"
+++#elif defined(SCHED_POLICY_STCF)
+++#define SCHEDULING_POLICY "STCF"
+++#elif defined(SCHED_POLICY_GROUP_STCF)
+++#define SCHEDULING_POLICY "GROUP_STCF"
+++#else
+++#define SCHEDULING_POLICY "RR"
+++#endif
++\ No newline at end of file
++```
++
++#### `kernel/proc.c`
++
++```diff
++diff --git a/kernel/proc.c b/kernel/proc.c
++index b6ecf6d..c791f09 100644
++--- a/kernel/proc.c
+++++ b/kernel/proc.c
++@@ -20,6 +20,20 @@ static void freeproc(struct proc *p);
++ 
++ extern char trampoline[]; // trampoline.S
++ 
+++// PHASE 1: let me use these for schedlogging in scheduler()
+++static uint schedlog_start_tick;
+++static int schedlog_duration;
+++
+++// PHASE 1: retrieve start tick as global tick value at that tick
+++void
+++schedlog_start(int duration)
+++{
+++  acquire(&tickslock);
+++  schedlog_start_tick = ticks;
+++  schedlog_duration = duration;
+++  release(&tickslock);
+++}
+++
++ // helps ensure that wakeups of wait()ing
++ // parents are not lost. helps obey the
++ // memory model when using p->parent.
++@@ -111,6 +125,14 @@ allocproc(void)
++ {
++   struct proc *p;
++ 
+++  // get the creation tick here, before the lock to prevent
+++  // possible deadlock with p->lock
+++  uint creation_tick;
+++
+++  acquire(&tickslock);
+++  creation_tick = ticks;
+++  release(&tickslock);
+++
++   for(p = proc; p < &proc[NPROC]; p++) {
++     acquire(&p->lock);
++     if(p->state == UNUSED) {
++@@ -125,6 +147,14 @@ found:
++   p->pid = allocpid();
++   p->state = USED;
++ 
+++  // PHASE 1
+++  // Initialize STCF scheduling information.
+++  p->creation_tick = creation_tick; // Record when process was created; important for breaking scheduling ties
+++  p->total_burst = DEFAULT_STCF_BURST; // Stores the process's configured CPU burst budget
+++  p->remaining_burst = DEFAULT_STCF_BURST; // Tracks how much of that budget remains
+++  p->time_in_queue = 0;
+++  p->ticks_consumed = 0;
+++
++   // Allocate a trapframe page.
++   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
++     freeproc(p);
++@@ -408,6 +438,71 @@ wait(uint64 addr)
++   }
++ }
++ 
+++// PHASE 1 MODIFICATION: Charge one CPU tick to the process interrupted by the timer.
+++// returns 1 if a process is killed, 0 otherwise
+++#if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
+++int
+++account_cpu_tick(struct proc *p)
+++{
+++  // Phase 1: Stop burst accounting once the process is marked killed (CL-38).
+++  if(p == 0 || killed(p)) {
+++    return 0;
+++  }
+++
+++  p->ticks_consumed++;
+++
+++  if(p->remaining_burst > 0) {
+++    p->remaining_burst--;
+++  }
+++
+++  // The burst has not been exhausted yet.
+++  if(p->remaining_burst > 0) {
+++    return 0;
+++  }
+++  
+++  // Keep init and sh alive by refreshing their burst budgets.
+++  if(strncmp(p->name, "init", sizeof("init")) == 0 ||
+++     strncmp(p->name, "sh", sizeof("sh")) == 0) {
+++    p->total_burst = DEFAULT_STCF_BURST;
+++    p->remaining_burst = DEFAULT_STCF_BURST;
+++    p->ticks_consumed = 0;
+++    return 0;
+++  } else {
+++    // Ordinary processes must not run beyond their burst.
+++    setkilled(p);
+++    return 1;
+++  }
+++}
+++#endif
+++
+++// PHASE 1: Print scheduling information when schedlog is active.
+++static void
+++schedlog_print(void)
+++{
+++  uint current_tick = ticks;
+++
+++  // Verify schedlog_duration has not lapsed.
+++  if(schedlog_duration <= 0 || current_tick - schedlog_start_tick >= schedlog_duration) {
+++    return;
+++  }
+++
+++  printf("%d|STCF|0(0,0)", current_tick);
+++
+++  for(struct proc *p = proc; p < &proc[NPROC]; p++) {
+++    if(p->state == UNUSED) {
+++      continue;
+++    }
+++
+++    printf(",[%d]%s:%d(%d,%d)",
+++      p->pid,
+++      p->name,
+++      p->state,
+++      p->remaining_burst,
+++      p->ticks_consumed);
+++  }
+++
+++  printf("\n");
+++}
+++
++ // Per-CPU process scheduler.
++ // Each CPU calls scheduler() after setting itself up.
++ // Scheduler never returns.  It loops, doing:
++@@ -432,23 +527,82 @@ scheduler(void)
++     intr_off();
++ 
++     int found = 0;
++-    for(p = proc; p < &proc[NPROC]; p++) {
++-      acquire(&p->lock);
++-      if(p->state == RUNNABLE) {
++-        // Switch to chosen process.  It is the process's job
++-        // to release its lock and then reacquire it
++-        // before jumping back to us.
++-        p->state = RUNNING;
++-        c->proc = p;
++-        swtch(&c->context, &p->context);
++-
++-        // Process is done running for now.
++-        // It should have changed its p->state before coming back.
++-        c->proc = 0;
++-        found = 1;
+++    #if defined(SCHED_POLICY_STCF)
+++      // PHASE 1: Find the RUNNABLE process with the shortest
+++      // remaining burst, breaking ties by creation tick and PID.
+++      struct proc *best = 0;
+++      int best_remaining = 0;
+++      uint best_creation_tick = 0;
+++      int best_pid = 0;
+++
+++      for(p = proc; p < &proc[NPROC]; p++) {
+++        acquire(&p->lock);
+++
+++        if(p->state == RUNNABLE) {
+++          if(best == 0 ||
+++            p->remaining_burst < best_remaining ||
+++            (p->remaining_burst == best_remaining &&
+++              p->creation_tick < best_creation_tick) ||
+++            (p->remaining_burst == best_remaining &&
+++              p->creation_tick == best_creation_tick &&
+++              p->pid < best_pid)) {
+++            best = p;
+++            best_remaining = p->remaining_burst;
+++            best_creation_tick = p->creation_tick;
+++            best_pid = p->pid;
+++          }
+++        }
+++
+++        release(&p->lock);
++       }
++-      release(&p->lock);
++-    }
+++
+++      if(best != 0) {
+++        // In case some part of the project is not run with CPUS=1: (verify)
+++        // A different CPU may have changed this process since
+++        // the scan, so reacquire its lock and validate our snapshot.
+++        acquire(&best->lock);
+++
+++        if(best->state == RUNNABLE &&
+++          best->remaining_burst == best_remaining &&
+++          best->creation_tick == best_creation_tick &&
+++          best->pid == best_pid) {
+++
+++          found = 1;
+++          best->state = RUNNING;
+++          c->proc = best;
+++
+++          schedlog_print();
+++          swtch(&c->context, &best->context);
+++
+++          // The process has yielded, slept, or exited.
+++          c->proc = 0;
+++        }
+++
+++        release(&best->lock);
+++      }
+++    #else
+++      // RR: preserve the original round-robin-style scan.
+++      for(p = proc; p < &proc[NPROC]; p++) {
+++        acquire(&p->lock);
+++
+++        if(p->state == RUNNABLE) {
+++          // Switch to chosen process.  It is the process's job
+++          // to release its lock and then reacquire it
+++          // before jumping back to us.
+++          p->state = RUNNING;
+++          c->proc = p;
+++
+++          schedlog_print();
+++          swtch(&c->context, &p->context);
+++
+++          // Process is done running for now.
+++          // It should have changed its p->state before coming back.
+++          c->proc = 0;
+++          found = 1;
+++        }
+++        release(&p->lock);
+++      }
+++    #endif
++     if(found == 0) {
++       // nothing to run; stop running on this core until an interrupt.
++       asm volatile("wfi");
++```
++
++#### `kernel/proc.h`
++
++```diff
++diff --git a/kernel/proc.h b/kernel/proc.h
++index d021857..de29003 100644
++--- a/kernel/proc.h
+++++ b/kernel/proc.h
++@@ -104,4 +104,11 @@ struct proc {
++   struct file *ofile[NOFILE];  // Open files
++   struct inode *cwd;           // Current directory
++   char name[16];               // Process name (debugging)
+++
+++  // PHASE 1 MODS
+++  uint creation_tick; // Tick at which the process is considered created; used for tie-breaking.
+++  int total_burst; // Configured total CPU burst allowance.
+++  int remaining_burst; // Remaining CPU ticks before the burst expires.
+++  uint time_in_queue; // Time spend waiting in the RUNNABLE state; needed for later starvation mitigation.
+++  uint ticks_consumed;
++ };
++```
++
++#### `kernel/stcf.h` *(new)*
++
++```diff
++diff --git a/kernel/stcf.h b/kernel/stcf.h
++new file mode 100644
++index 0000000..b664973
++--- /dev/null
+++++ b/kernel/stcf.h
++@@ -0,0 +1,12 @@
+++// PHASE 1 (NEW FILE)
+++#ifndef _STCF_H_
+++#define _STCF_H_
+++
+++// Project document defined constants.
+++#define DEFAULT_STCF_BURST 100 // default total burst time assigned to processes
+++#define STCF_AT 20 // constant denoting how many ticks must be spent waiting befoe a process can earn a time discount; used to calculate ERBT
+++#define STCF_AD 20 // constant denoting the time discount given to a process for waiting; used to calculate ERBT
+++#define N_GROUPS 3 // note: this will need to be set t 4 for Phase 4, 8 for Phase 5
+++#define DEFAULT_SHARES 100
+++
+++#endif
++\ No newline at end of file
++```
++
++#### `kernel/syscall.c`
++
++```diff
++diff --git a/kernel/syscall.c b/kernel/syscall.c
++index bd30737..444075b 100644
++--- a/kernel/syscall.c
+++++ b/kernel/syscall.c
++@@ -102,6 +102,8 @@ extern uint64 sys_link(void);
++ extern uint64 sys_mkdir(void);
++ extern uint64 sys_close(void);
++ extern uint64 sys_shutdown(void);
+++extern uint64 sys_schedlog(void); // PHASE 1 MODIFICATIONS
+++extern uint64 sys_setburst(void);
++ 
++ // An array mapping syscall numbers from syscall.h
++ // to the function that handles the system call.
++@@ -128,6 +130,8 @@ static uint64 (*syscalls[])(void) = {
++ [SYS_mkdir]   sys_mkdir,
++ [SYS_close]   sys_close,
++ [SYS_shutdown]   sys_shutdown,
+++[SYS_schedlog]   sys_schedlog, // PHASE 1 MODIFICATIONS
+++[SYS_setburst]   sys_setburst,
++ };
++ 
++ void
++```
++
++#### `kernel/syscall.h`
++
++```diff
++diff --git a/kernel/syscall.h b/kernel/syscall.h
++index 1913514..8b18d81 100644
++--- a/kernel/syscall.h
+++++ b/kernel/syscall.h
++@@ -21,3 +21,5 @@
++ #define SYS_mkdir  20
++ #define SYS_close  21
++ #define SYS_shutdown  22
+++#define SYS_schedlog  23    // PHASE 1 MODIFICATION
+++#define SYS_setburst  24    // PHASE 1 MODIFICATION
++\ No newline at end of file
++```
++
++#### `kernel/sysproc.c`
++
++```diff
++diff --git a/kernel/sysproc.c b/kernel/sysproc.c
++index 182d924..246c062 100644
++--- a/kernel/sysproc.c
+++++ b/kernel/sysproc.c
++@@ -105,3 +105,47 @@ sys_shutdown(void)
++   (*(volatile uint32 *) 0x100000) = 0x5555;
++   return 0;
++ }
+++
+++// PHASE 1: Add schedlog and setburst calls.
+++uint64
+++sys_schedlog(void)
+++{
+++  int duration;
+++
+++  argint(0, &duration);
+++
+++  if(duration <= 0) {
+++    return -1;
+++  }
+++  
+++  schedlog_start(duration);
+++  return 0;
+++}
+++
+++uint64
+++sys_setburst(void)
+++{
+++  int burst;
+++  struct proc *p = myproc();
+++
+++  argint(0, &burst);
+++
+++  // Invalid burst: mark the process as killed.
+++  if(burst <= 0) {
+++    setkilled(p);
+++    return -1;
+++  }
+++
+++  // Phase 1: Valid setburst has no effect under vanilla RR (CL-03/CL-19).
+++#if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
+++  // Phase 1: Update the process's burst-time budget.
+++  p->total_burst = burst;
+++  p->remaining_burst = burst;
+++
+++  // Phase 1: Reset the number of ticks consumed.
+++  p->ticks_consumed = 0;
+++
+++  // Phase 1: Always yield after a valid STCF burst update (CL-13).
+++  yield();
+++#endif
+++
+++  return 0;
+++}
+++
++```
++
++#### `kernel/trap.c`
++
++```diff
++diff --git a/kernel/trap.c b/kernel/trap.c
++index 8a93454..9b5889e 100644
++--- a/kernel/trap.c
+++++ b/kernel/trap.c
++@@ -77,12 +77,22 @@ usertrap(void)
++     setkilled(p);
++   }
++ 
+++  // PHASE 1: Account CPU time for STCF policies.
+++  #if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
+++    if(which_dev == 2)
+++      account_cpu_tick(p);
+++  #endif
+++
++   if(killed(p))
++     exit(-1);
++ 
++   // give up the CPU if this is a timer interrupt.
++-  if(which_dev == 2)
++-    yield();
+++  // RR and GROUP_STCF retain their timer-based yielding behavior.
+++  // PHASE 1 STCF is non-preemptive (technically SJF). 
+++  #if !defined(SCHED_POLICY_STCF)
+++    if(which_dev == 2)
+++      yield();
+++  #endif
++ 
++   prepare_return();
++ 
++@@ -152,8 +162,31 @@ kerneltrap()
++   }
++ 
++   // give up the CPU if this is a timer interrupt.
++-  if(which_dev == 2 && myproc() != 0)
++-    yield();
+++  // PHASE 1 CHANGE
+++  #if defined(SCHED_POLICY_STCF)
+++    if(which_dev == 2 && myproc() != 0) {
+++      struct proc *p = myproc();
+++
+++      if(account_cpu_tick(p)) {
+++        // Phase 1: Switch immediately on exhaustion; let the interrupted
+++        // syscall finish before usertrap() handles normal killed termination.
+++        yield();
+++      }
+++    }
+++  #elif defined(SCHED_POLICY_GROUP_STCF)
+++    if(which_dev == 2 && myproc() != 0) {
+++      account_cpu_tick(myproc());
+++      yield();
+++    }
+++  #else // RR
+++    if(which_dev == 2 && myproc() != 0) {
+++      yield();
+++    }
+++  #endif
++ 
++   // the yield() may have caused some traps to occur,
++   // so restore trap registers for use by kernelvec.S's sepc instruction.
++```
++
++#### `user/schedlogtest.c` *(new)*
++
++```diff
++diff --git a/user/schedlogtest.c b/user/schedlogtest.c
++new file mode 100644
++index 0000000..2da5067
++--- /dev/null
+++++ b/user/schedlogtest.c
++@@ -0,0 +1,11 @@
+++#include "kernel/types.h"
+++#include "user/user.h"
+++
+++int
+++main(void)
+++{
+++  printf("schedlog returned %d\n", schedlog(5));
+++  for(volatile int i = 0; i < 100000000; i++)
+++    ;
+++  exit(0);
+++}
++\ No newline at end of file
++```
++
++#### `user/setbursttest.c` *(new)*
++
++```diff
++diff --git a/user/setbursttest.c b/user/setbursttest.c
++new file mode 100644
++index 0000000..1fcb40a
++--- /dev/null
+++++ b/user/setbursttest.c
++@@ -0,0 +1,105 @@
+++// PHASE 1 (NEW FILE)
+++#include "kernel/types.h"
+++#include "kernel/stat.h"
+++#include "user/user.h"
+++
+++void
+++test_invalid_burst(int burst)
+++{
+++  int pid = fork();
+++
+++  if(pid < 0) {
+++    printf("ERROR: fork failed\n");
+++    exit(1);
+++  }
+++
+++  if(pid == 0) {
+++    printf("Testing setburst(%d)...\n", burst);
+++
+++    int result = setburst(burst);
+++
+++    // Reaching this point means the invalid-burst process was not terminated as expected.
+++    printf("ERROR: setburst(%d) returned %d; process survived\n",
+++           burst, result);
+++    exit(1);
+++  }
+++
+++  // The parent waits for the child to terminate.
+++  wait(0);
+++  printf("Invalid-burst child reaped (burst=%d).\n", burst);
+++}
+++
+++// PHASE 1: Test termination when a valid burst is exhausted.
+++void
+++test_burst_exhaustion(void)
+++{
+++  int pid = fork();
+++
+++  if(pid < 0) {
+++    printf("ERROR: fork failed\n");
+++    exit(1);
+++  }
+++
+++  if(pid == 0) {
+++    printf("Child: setting burst to 1 tick\n");
+++
+++    int result = setburst(1);
+++    if(result != 0) {
+++      printf("ERROR: setburst(1) returned %d\n", result);
+++    }
+++    printf("Child: entering infinite loop\n");
+++    printf("setburst(1) output: %d\n", result);
+++
+++    // Prevent the compiler from optimizing away the loop.
+++    volatile uint64 counter = 0;
+++    while(1) {
+++      counter++;
+++    }
+++    // Should never be reached.
+++    printf("FAIL: child survived burst exhaustion\n");
+++    exit(1);
+++  }
+++
+++  // The parent waits for the child to be terminated.
+++  wait(0);
+++  printf("Child reaped after burst-exhaustion test.\n");
+++}
+++
+++int
+++main(void)
+++{
+++  printf("---SETBURST SYSCALL TESTS BEGIN---\n");
+++
+++  // Test 1: Positive burst value.
+++  printf("\nTest 1: Valid burst\n");
+++
+++  int result = setburst(10);
+++  if(result == 0) {
+++    printf("PASS: setburst(10) returned 0\n");
+++  } else {
+++    printf("FAIL: setburst(10) returned %d\n", result);
+++  }
+++
+++  // Test 2: Update the burst value again.
+++  printf("\nTest 2: Update burst\n");
+++
+++  result = setburst(20);
+++  if(result == 0) {
+++    printf("PASS: setburst(20) returned 0\n");
+++  } else {
+++    printf("FAIL: setburst(20) returned %d\n", result);
+++  }
+++
+++  // Test 3: Invalid burst values.
+++  printf("\nTest 3: Invalid bursts\n");
+++
+++  test_invalid_burst(0);
+++  test_invalid_burst(-5);
+++
+++  #if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
+++    printf("\nTest 4: Burst exhaustion\n");
+++    test_burst_exhaustion();
+++  #endif
+++  printf("\n---ALL TESTS FINISHED---\n"); // sanaol
+++  exit(0);
+++}
++```
++
++#### `user/user.h`
++
++```diff
++diff --git a/user/user.h b/user/user.h
++index 628ff19..929c3fe 100644
++--- a/user/user.h
+++++ b/user/user.h
++@@ -23,6 +23,10 @@ char* sbrk(int);
++ int sleep(int);
++ int uptime(void);
++ int shutdown(void);
+++int schedlog(int); // PHASE 1: Expose schedlog to user programs.
+++int setburst(int); // Expose setburst to user programs.
+++
+++
++ 
++ // ulib.c
++ int stat(const char*, struct stat*);
++```
++
++#### `user/usys.pl`
++
++```diff
++diff --git a/user/usys.pl b/user/usys.pl
++index 461806c..2af0c36 100644
++--- a/user/usys.pl
+++++ b/user/usys.pl
++@@ -37,3 +37,5 @@ entry("sbrk");
++ entry("sleep");
++ entry("uptime");
++ entry("shutdown");
+++entry("setburst"); # PHASE 1 MODIFICATION: Generate user-space wrapper for setburst.
+++entry("schedlog"); # PHASE 1 MODIFICATION: Generate user-space wrapper for schedlog.
++\ No newline at end of file
++```
+diff --git a/kernel/defs.h b/kernel/defs.h
+index aef7718..7b33522 100644
+--- a/kernel/defs.h
++++ b/kernel/defs.h
+@@ -101,6 +101,8 @@ void            yield(void);
+ int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
+ int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
+ void            procdump(void);
++int             account_cpu_tick(struct proc *); // PHASE 1 MODIFICATION
++void            schedlog_start(int duration); // PHASE 1 MODIFICATION
+ 
+ // swtch.S
+ void            swtch(struct context*, struct context*);
+diff --git a/kernel/main.c b/kernel/main.c
+index f0d3171..5a956ca 100644
+--- a/kernel/main.c
++++ b/kernel/main.c
+@@ -13,6 +13,7 @@ main()
+   if(cpuid() == 0){
+     consoleinit();
+     printfinit();
++    printf("Using Policy: %s\n", SCHEDULING_POLICY);
+     printf("\n");
+     printf("xv6 kernel is booting\n");
+     printf("\n");
+diff --git a/kernel/param.h b/kernel/param.h
+index 80ec6d3..70560d3 100644
+--- a/kernel/param.h
++++ b/kernel/param.h
+@@ -13,3 +13,16 @@
+ #define MAXPATH      128   // maximum file path name
+ #define USERSTACK    1     // user stack pages
+ 
++
++// PHASE 1
++#include "stcf.h"
++
++#if defined(SCHED_POLICY_RR)
++#define SCHEDULING_POLICY "RR"
++#elif defined(SCHED_POLICY_STCF)
++#define SCHEDULING_POLICY "STCF"
++#elif defined(SCHED_POLICY_GROUP_STCF)
++#define SCHEDULING_POLICY "GROUP_STCF"
++#else
++#define SCHEDULING_POLICY "RR"
++#endif
+\ No newline at end of file
+diff --git a/kernel/proc.c b/kernel/proc.c
+index b6ecf6d..a5e8908 100644
+--- a/kernel/proc.c
++++ b/kernel/proc.c
+@@ -20,6 +20,26 @@ static void freeproc(struct proc *p);
+ 
+ extern char trampoline[]; // trampoline.S
+ 
++// PHASE 1: let me use these for schedlogging in scheduler()
++static uint schedlog_start_tick;
++static int schedlog_duration;
++struct spinlock schedlog_lock; // secures operations on the schedlog_start_tick and schedlog_duration global variables
++
++// PHASE 1: retrieve start tick as global tick value at that tick
++void
++schedlog_start(int duration)
++{
++  acquire(&tickslock);
++  uint start_tick = ticks;
++  release(&tickslock);
++  
++  acquire(&schedlog_lock);
++  // Publish the start and duration together so readers see one activation.
++  schedlog_start_tick = start_tick;
++  schedlog_duration = duration;
++  release(&schedlog_lock);
++}
++
+ // helps ensure that wakeups of wait()ing
+ // parents are not lost. helps obey the
+ // memory model when using p->parent.
+@@ -51,6 +71,7 @@ procinit(void)
+   
+   initlock(&pid_lock, "nextpid");
+   initlock(&wait_lock, "wait_lock");
++  initlock(&schedlog_lock, "schedlog_lock");
+   for(p = proc; p < &proc[NPROC]; p++) {
+       initlock(&p->lock, "proc");
+       p->state = UNUSED;
+@@ -111,6 +132,14 @@ allocproc(void)
+ {
+   struct proc *p;
+ 
++  // get the creation tick here, before the lock to prevent
++  // possible deadlock with p->lock
++  uint creation_tick;
++
++  acquire(&tickslock);
++  creation_tick = ticks;
++  release(&tickslock);
++
+   for(p = proc; p < &proc[NPROC]; p++) {
+     acquire(&p->lock);
+     if(p->state == UNUSED) {
+@@ -125,6 +154,14 @@ found:
+   p->pid = allocpid();
+   p->state = USED;
+ 
++  // PHASE 1
++  // Initialize STCF scheduling information.
++  p->creation_tick = creation_tick; // Record when process was created; important for breaking scheduling ties
++  p->total_burst = DEFAULT_STCF_BURST; // Stores the process's configured CPU burst budget
++  p->remaining_burst = DEFAULT_STCF_BURST; // Tracks how much of that budget remains
++  p->time_in_queue = 0;
++  p->ticks_consumed = 0;
++
+   // Allocate a trapframe page.
+   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
+     freeproc(p);
+@@ -408,6 +445,74 @@ wait(uint64 addr)
+   }
+ }
+ 
++// PHASE 1 MODIFICATION: Charge one CPU tick to the process interrupted by the timer.
++// returns 1 if a process is killed, 0 otherwise
++#if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
++int
++account_cpu_tick(struct proc *p)
++{
++  // Phase 1: Stop burst accounting once the process is marked killed (CL-38).
++  if(p == 0 || killed(p)) {
++    return 0;
++  }
++
++  p->ticks_consumed++;
++
++  if(p->remaining_burst > 0) {
++    p->remaining_burst--;
++  }
++
++  // The burst has not been exhausted yet.
++  if(p->remaining_burst > 0) {
++    return 0;
++  }
++  
++  // Keep init and sh alive by refreshing their burst budgets.
++  if(strncmp(p->name, "init", sizeof("init")) == 0 ||
++     strncmp(p->name, "sh", sizeof("sh")) == 0) {
++    p->total_burst = DEFAULT_STCF_BURST;
++    p->remaining_burst = DEFAULT_STCF_BURST;
++    p->ticks_consumed = 0;
++    return 0;
++  } else {
++    // Ordinary processes must not run beyond their burst.
++    setkilled(p);
++    return 1;
++  }
++}
++#endif
++
++// PHASE 1: Print scheduling information when schedlog is active.
++static void
++schedlog_print(void)
++{
++  acquire(&tickslock);
++  uint current_tick = ticks;
++  release(&tickslock);
++
++  // Verify schedlog_duration has not lapsed.
++  if(schedlog_duration <= 0 || current_tick - schedlog_start_tick >= schedlog_duration) {
++    return;
++  }
++
++  printf("%u|STCF|0(0,0)", current_tick);
++
++  for(struct proc *p = proc; p < &proc[NPROC]; p++) {
++    if(p->state == UNUSED) {
++      continue;
++    }
++
++    printf(",[%d]%s:%d(%d,%d)",
++      p->pid,
++      p->name,
++      p->state,
++      p->remaining_burst,
++      p->ticks_consumed);
++  }
++
++  printf("\n");
++}
++
+ // Per-CPU process scheduler.
+ // Each CPU calls scheduler() after setting itself up.
+ // Scheduler never returns.  It loops, doing:
+@@ -432,23 +537,82 @@ scheduler(void)
+     intr_off();
+ 
+     int found = 0;
+-    for(p = proc; p < &proc[NPROC]; p++) {
+-      acquire(&p->lock);
+-      if(p->state == RUNNABLE) {
+-        // Switch to chosen process.  It is the process's job
+-        // to release its lock and then reacquire it
+-        // before jumping back to us.
+-        p->state = RUNNING;
+-        c->proc = p;
+-        swtch(&c->context, &p->context);
+-
+-        // Process is done running for now.
+-        // It should have changed its p->state before coming back.
+-        c->proc = 0;
+-        found = 1;
++    #if defined(SCHED_POLICY_STCF)
++      // PHASE 1: Find the RUNNABLE process with the shortest
++      // remaining burst, breaking ties by creation tick and PID.
++      struct proc *best = 0;
++      int best_remaining = 0;
++      uint best_creation_tick = 0;
++      int best_pid = 0;
++
++      for(p = proc; p < &proc[NPROC]; p++) {
++        acquire(&p->lock);
++
++        if(p->state == RUNNABLE) {
++          if(best == 0 ||
++            p->remaining_burst < best_remaining ||
++            (p->remaining_burst == best_remaining &&
++              p->creation_tick < best_creation_tick) ||
++            (p->remaining_burst == best_remaining &&
++              p->creation_tick == best_creation_tick &&
++              p->pid < best_pid)) {
++            best = p;
++            best_remaining = p->remaining_burst;
++            best_creation_tick = p->creation_tick;
++            best_pid = p->pid;
++          }
++        }
++
++        release(&p->lock);
+       }
+-      release(&p->lock);
+-    }
++
++      if(best != 0) {
++        // In case some part of the project is not run with CPUS=1: (verify)
++        // A different CPU may have changed this process since
++        // the scan, so reacquire its lock and validate our snapshot.
++        acquire(&best->lock);
++
++        if(best->state == RUNNABLE &&
++          best->remaining_burst == best_remaining &&
++          best->creation_tick == best_creation_tick &&
++          best->pid == best_pid) {
++
++          found = 1;
++          best->state = RUNNING;
++          c->proc = best;
++
++          schedlog_print();
++          swtch(&c->context, &best->context);
++
++          // The process has yielded, slept, or exited.
++          c->proc = 0;
++        }
++
++        release(&best->lock);
++      }
++    #else
++      // RR: preserve the original round-robin-style scan.
++      for(p = proc; p < &proc[NPROC]; p++) {
++        acquire(&p->lock);
++
++        if(p->state == RUNNABLE) {
++          // Switch to chosen process.  It is the process's job
++          // to release its lock and then reacquire it
++          // before jumping back to us.
++          p->state = RUNNING;
++          c->proc = p;
++
++          schedlog_print();
++          swtch(&c->context, &p->context);
++
++          // Process is done running for now.
++          // It should have changed its p->state before coming back.
++          c->proc = 0;
++          found = 1;
++        }
++        release(&p->lock);
++      }
++    #endif
+     if(found == 0) {
+       // nothing to run; stop running on this core until an interrupt.
+       asm volatile("wfi");
+diff --git a/kernel/proc.h b/kernel/proc.h
+index d021857..de29003 100644
+--- a/kernel/proc.h
++++ b/kernel/proc.h
+@@ -104,4 +104,11 @@ struct proc {
+   struct file *ofile[NOFILE];  // Open files
+   struct inode *cwd;           // Current directory
+   char name[16];               // Process name (debugging)
++
++  // PHASE 1 MODS
++  uint creation_tick; // Tick at which the process is considered created; used for tie-breaking.
++  int total_burst; // Configured total CPU burst allowance.
++  int remaining_burst; // Remaining CPU ticks before the burst expires.
++  uint time_in_queue; // Time spend waiting in the RUNNABLE state; needed for later starvation mitigation.
++  uint ticks_consumed;
+ };
+diff --git a/kernel/stcf.h b/kernel/stcf.h
+new file mode 100644
+index 0000000..b664973
+--- /dev/null
++++ b/kernel/stcf.h
+@@ -0,0 +1,12 @@
++// PHASE 1 (NEW FILE)
++#ifndef _STCF_H_
++#define _STCF_H_
++
++// Project document defined constants.
++#define DEFAULT_STCF_BURST 100 // default total burst time assigned to processes
++#define STCF_AT 20 // constant denoting how many ticks must be spent waiting befoe a process can earn a time discount; used to calculate ERBT
++#define STCF_AD 20 // constant denoting the time discount given to a process for waiting; used to calculate ERBT
++#define N_GROUPS 3 // note: this will need to be set t 4 for Phase 4, 8 for Phase 5
++#define DEFAULT_SHARES 100
++
++#endif
+\ No newline at end of file
+diff --git a/kernel/syscall.c b/kernel/syscall.c
+index bd30737..444075b 100644
+--- a/kernel/syscall.c
++++ b/kernel/syscall.c
+@@ -102,6 +102,8 @@ extern uint64 sys_link(void);
+ extern uint64 sys_mkdir(void);
+ extern uint64 sys_close(void);
+ extern uint64 sys_shutdown(void);
++extern uint64 sys_schedlog(void); // PHASE 1 MODIFICATIONS
++extern uint64 sys_setburst(void);
+ 
+ // An array mapping syscall numbers from syscall.h
+ // to the function that handles the system call.
+@@ -128,6 +130,8 @@ static uint64 (*syscalls[])(void) = {
+ [SYS_mkdir]   sys_mkdir,
+ [SYS_close]   sys_close,
+ [SYS_shutdown]   sys_shutdown,
++[SYS_schedlog]   sys_schedlog, // PHASE 1 MODIFICATIONS
++[SYS_setburst]   sys_setburst,
+ };
+ 
+ void
+diff --git a/kernel/syscall.h b/kernel/syscall.h
+index 1913514..8b18d81 100644
+--- a/kernel/syscall.h
++++ b/kernel/syscall.h
+@@ -21,3 +21,5 @@
+ #define SYS_mkdir  20
+ #define SYS_close  21
+ #define SYS_shutdown  22
++#define SYS_schedlog  23    // PHASE 1 MODIFICATION
++#define SYS_setburst  24    // PHASE 1 MODIFICATION
+\ No newline at end of file
+diff --git a/kernel/sysproc.c b/kernel/sysproc.c
+index 182d924..9b81b4b 100644
+--- a/kernel/sysproc.c
++++ b/kernel/sysproc.c
+@@ -105,3 +105,50 @@ sys_shutdown(void)
+   (*(volatile uint32 *) 0x100000) = 0x5555;
+   return 0;
+ }
++
++// PHASE 1: Add schedlog and setburst calls.
++uint64
++sys_schedlog(void)
++{
++  int duration;
++
++  argint(0, &duration);
++
++  if(duration <= 0) {
++    return -1;
++  }
++  
++  schedlog_start(duration);
++  return 0;
++}
++
++uint64
++sys_setburst(void)
++{
++  int burst;
++  struct proc *p = myproc();
++
++  argint(0, &burst);
++
++  // Invalid burst: mark the process as killed.
++  if(burst <= 0) {
++    setkilled(p);
++    return -1;
++  }
++
++  // Phase 1: Valid setburst has no effect under vanilla RR (CL-03/CL-19).
++#if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
++  // Phase 1: Update the process's burst-time budget.
++  p->total_burst = burst;
++  p->remaining_burst = burst;
++
++  // Phase 1: Reset the number of ticks consumed.
++  p->ticks_consumed = 0;
++
++  // Phase 1: Always yield after a valid STCF burst update (CL-13).
++  yield();
++#endif
++
++  return 0;
++}
++
+diff --git a/kernel/trap.c b/kernel/trap.c
+index 8a93454..5af4084 100644
+--- a/kernel/trap.c
++++ b/kernel/trap.c
+@@ -77,13 +77,32 @@ usertrap(void)
+     setkilled(p);
+   }
+ 
++  // PHASE 1: Account CPU time for STCF policies.
++  #if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
++    if(which_dev == 2)
++      account_cpu_tick(p);
++  #endif
++
+   if(killed(p))
+     exit(-1);
+ 
+   // give up the CPU if this is a timer interrupt.
+-  if(which_dev == 2)
+-    yield();
+-
++  // RR and GROUP_STCF retain their timer-based yielding behavior.
++  // PHASE 1 STCF is non-preemptive (technically SJF). 
++  #if !defined(SCHED_POLICY_STCF)
++    if(which_dev == 2)
++      yield();
++  #endif
++  
++  // A process killed after the earlier check may resume here in kernel mode,
++  // but must exit before executing more user code. 
++  // Keep interrupts off between this check and the return
++  // to user mode so a timer cannot mark us killed after the final check.
++  intr_off();
++  if(killed(p)) {
++    exit(-1);
++  }
++  
+   prepare_return();
+ 
+   // the user page table to switch to, for trampoline.S
+@@ -152,8 +171,27 @@ kerneltrap()
+   }
+ 
+   // give up the CPU if this is a timer interrupt.
+-  if(which_dev == 2 && myproc() != 0)
+-    yield();
++  // PHASE 1 CHANGE
++  #if defined(SCHED_POLICY_STCF)
++    if(which_dev == 2 && myproc() != 0) {
++      struct proc *p = myproc();
++
++      if(account_cpu_tick(p)) {
++        // Phase 1: Switch immediately on exhaustion; let the interrupted
++        // syscall finish before usertrap() handles normal killed termination.
++        yield();
++      }
++    }
++  #elif defined(SCHED_POLICY_GROUP_STCF)
++    if(which_dev == 2 && myproc() != 0) {
++      account_cpu_tick(myproc());
++      yield();
++    }
++  #else // RR
++    if(which_dev == 2 && myproc() != 0) {
++      yield();
++    }
++  #endif
+ 
+   // the yield() may have caused some traps to occur,
+   // so restore trap registers for use by kernelvec.S's sepc instruction.
+diff --git a/pyproject.toml b/pyproject.toml
+new file mode 100644
+index 0000000..14ef266
+--- /dev/null
++++ b/pyproject.toml
+@@ -0,0 +1,5 @@
++[project]
++name = "cs140-project1"
++version = "0.1.0"
++requires-python = ">=3.13"
++dependencies = []
+diff --git a/requirements.txt b/requirements.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/user/schedlogtest.c b/user/schedlogtest.c
+new file mode 100644
+index 0000000..2da5067
+--- /dev/null
++++ b/user/schedlogtest.c
+@@ -0,0 +1,11 @@
++#include "kernel/types.h"
++#include "user/user.h"
++
++int
++main(void)
++{
++  printf("schedlog returned %d\n", schedlog(5));
++  for(volatile int i = 0; i < 100000000; i++)
++    ;
++  exit(0);
++}
+\ No newline at end of file
+diff --git a/user/setbursttest.c b/user/setbursttest.c
+new file mode 100644
+index 0000000..1fcb40a
+--- /dev/null
++++ b/user/setbursttest.c
+@@ -0,0 +1,105 @@
++// PHASE 1 (NEW FILE)
++#include "kernel/types.h"
++#include "kernel/stat.h"
++#include "user/user.h"
++
++void
++test_invalid_burst(int burst)
++{
++  int pid = fork();
++
++  if(pid < 0) {
++    printf("ERROR: fork failed\n");
++    exit(1);
++  }
++
++  if(pid == 0) {
++    printf("Testing setburst(%d)...\n", burst);
++
++    int result = setburst(burst);
++
++    // Reaching this point means the invalid-burst process was not terminated as expected.
++    printf("ERROR: setburst(%d) returned %d; process survived\n",
++           burst, result);
++    exit(1);
++  }
++
++  // The parent waits for the child to terminate.
++  wait(0);
++  printf("Invalid-burst child reaped (burst=%d).\n", burst);
++}
++
++// PHASE 1: Test termination when a valid burst is exhausted.
++void
++test_burst_exhaustion(void)
++{
++  int pid = fork();
++
++  if(pid < 0) {
++    printf("ERROR: fork failed\n");
++    exit(1);
++  }
++
++  if(pid == 0) {
++    printf("Child: setting burst to 1 tick\n");
++
++    int result = setburst(1);
++    if(result != 0) {
++      printf("ERROR: setburst(1) returned %d\n", result);
++    }
++    printf("Child: entering infinite loop\n");
++    printf("setburst(1) output: %d\n", result);
++
++    // Prevent the compiler from optimizing away the loop.
++    volatile uint64 counter = 0;
++    while(1) {
++      counter++;
++    }
++    // Should never be reached.
++    printf("FAIL: child survived burst exhaustion\n");
++    exit(1);
++  }
++
++  // The parent waits for the child to be terminated.
++  wait(0);
++  printf("Child reaped after burst-exhaustion test.\n");
++}
++
++int
++main(void)
++{
++  printf("---SETBURST SYSCALL TESTS BEGIN---\n");
++
++  // Test 1: Positive burst value.
++  printf("\nTest 1: Valid burst\n");
++
++  int result = setburst(10);
++  if(result == 0) {
++    printf("PASS: setburst(10) returned 0\n");
++  } else {
++    printf("FAIL: setburst(10) returned %d\n", result);
++  }
++
++  // Test 2: Update the burst value again.
++  printf("\nTest 2: Update burst\n");
++
++  result = setburst(20);
++  if(result == 0) {
++    printf("PASS: setburst(20) returned 0\n");
++  } else {
++    printf("FAIL: setburst(20) returned %d\n", result);
++  }
++
++  // Test 3: Invalid burst values.
++  printf("\nTest 3: Invalid bursts\n");
++
++  test_invalid_burst(0);
++  test_invalid_burst(-5);
++
++  #if defined(SCHED_POLICY_STCF) || defined(SCHED_POLICY_GROUP_STCF)
++    printf("\nTest 4: Burst exhaustion\n");
++    test_burst_exhaustion();
++  #endif
++  printf("\n---ALL TESTS FINISHED---\n"); // sanaol
++  exit(0);
++}
+diff --git a/user/shutdown.c b/user/shutdown.c
+index 1558ad2..a695995 100644
+--- a/user/shutdown.c
++++ b/user/shutdown.c
+@@ -3,4 +3,5 @@
+ 
+ int main() {
+   shutdown();
++  return 0;
+ }
+diff --git a/user/user.h b/user/user.h
+index 628ff19..929c3fe 100644
+--- a/user/user.h
++++ b/user/user.h
+@@ -23,6 +23,10 @@ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
+ int shutdown(void);
++int schedlog(int); // PHASE 1: Expose schedlog to user programs.
++int setburst(int); // Expose setburst to user programs.
++
++
+ 
+ // ulib.c
+ int stat(const char*, struct stat*);
+diff --git a/user/usys.pl b/user/usys.pl
+index 461806c..2af0c36 100644
+--- a/user/usys.pl
++++ b/user/usys.pl
+@@ -37,3 +37,5 @@ entry("sbrk");
+ entry("sleep");
+ entry("uptime");
+ entry("shutdown");
++entry("setburst"); # PHASE 1 MODIFICATION: Generate user-space wrapper for setburst.
++entry("schedlog"); # PHASE 1 MODIFICATION: Generate user-space wrapper for schedlog.
+\ No newline at end of file
